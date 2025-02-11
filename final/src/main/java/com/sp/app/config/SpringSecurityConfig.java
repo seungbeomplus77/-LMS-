@@ -30,7 +30,8 @@ public class SpringSecurityConfig {
 
         // 정적 자원 및 공개 URI
         String[] excludeUri = { "/login", "/index.jsp", "/dist/**", "/uploads/photo/**",
-                "/favicon.ico", "/WEB-INF/views/**", "/uploads/image/**", "/**" };
+                "/favicon.ico", "/WEB-INF/views/**", "/uploads/image/**", "/enter/**",
+                "/introduce/**", "/news/**", "/gradeGuide/**", "/faq/**"};
 
         http.cors(Customizer.withDefaults())
             .csrf(AbstractHttpConfigurer::disable)

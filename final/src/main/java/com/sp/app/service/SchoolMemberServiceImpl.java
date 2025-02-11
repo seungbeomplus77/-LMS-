@@ -38,7 +38,6 @@ public class SchoolMemberServiceImpl implements SchoolMemberService {
 			// 권한 null일때 기본값
 			if (dto.getAuthority() == null || dto.getAuthority().isBlank()) {
 				dto.setAuthority("USER"); 
-			
 			}
 			
 			// 회원 정보 저장

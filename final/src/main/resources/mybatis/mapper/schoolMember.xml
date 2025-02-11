@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sp.app.mapper.SchoolMemberMapper">
+
+  <!-- 로그인 시 사용되는 매핑 -->
+<select id="loginSchoolMember" parameterType="string" resultType="com.sp.app.model.SchoolMember">
+  SELECT 
+    m.schoolId,
+    m.userId,
+    m.userPwd,
+    m.userName,
+    m.gender,
+    m.enabled,
+    TO_CHAR(m.register_date, 'YYYY-MM-DD HH24:MI:SS') AS register_date,
+    TO_CHAR(m.modify_date, 'YYYY-MM-DD HH24:MI:SS') AS modify_date,
+    TO_CHAR(m.last_login, 'YYYY-MM-DD HH24:MI:SS') AS last_login,
+    m.email,
+    m.receiveEmail,
+    m.tel,
+    m.zip,
+    m.addr1,
+    m.addr2,
+    m.ipAddr,
+    r.roleId,
+    NVL(r.authority, 'USER') AS authority
+  FROM schoolmember m
+  LEFT JOIN school_role sr ON m.schoolId = sr.schoolId
+  LEFT JOIN role r ON sr.roleId = r.roleId
+  WHERE m.userId = #{userId}
+</select>
+
+
+  <!-- findById: 사용자 상세 정보를 조회 (실패 횟수 포함) -->
+  <select id="findById" parameterType="string" resultType="com.sp.app.model.SchoolMember">
+    SELECT 
+      m.schoolId,
+      m.userId,
+      m.userPwd,
+      m.userName,
+      m.gender,
+      m.enabled,
+      TO_CHAR(m.register_date, 'YYYY-MM-DD HH24:MI:SS') AS register_date,
+      TO_CHAR(m.modify_date, 'YYYY-MM-DD HH24:MI:SS') AS modify_date,
+      TO_CHAR(m.last_login, 'YYYY-MM-DD HH24:MI:SS') AS last_login,
+      m.email,
+      m.receiveEmail,
+      m.tel,
+      m.zip,
+      m.addr1,
+      m.addr2,
+      m.ipAddr,
+      r.roleId,
+      r.authority,
+      m.failed_login_cnt
+    FROM schoolmember m
+    LEFT JOIN school_role sr ON m.schoolId = sr.schoolId
+    LEFT JOIN role r ON sr.roleId = r.roleId
+    WHERE m.userId = #{userId}
+  </select>
+
+  <!-- checkFailureCount: 로그인 실패 횟수를 조회 -->
+  <select id="checkFailureCount" parameterType="string" resultType="int">
+    SELECT NVL(failed_login_cnt, 0)
+    FROM schoolmember
+    WHERE userId = #{userId}
+  </select>
+
+  <!-- updateFailureCount: 로그인 실패 시 실패 횟수를 1 증가 -->
+  <update id="updateFailureCount" parameterType="string">
+    UPDATE schoolmember
+    SET failed_login_cnt = NVL(failed_login_cnt, 0) + 1
+    WHERE userId = #{userId}
+  </update>
+
+  <!-- updateFailureCountReset: 로그인 성공 시 실패 횟수를 0으로 초기화 -->
+  <update id="updateFailureCountReset" parameterType="string">
+    UPDATE schoolmember
+    SET failed_login_cnt = 0
+    WHERE userId = #{userId}
+  </update>
+
+  <!-- updateLastLogin: 로그인 성공 후 마지막 로그인 시간을 SYSDATE로 업데이트 -->
+  <update id="updateLastLogin" parameterType="string">
+    UPDATE schoolmember
+    SET last_login = SYSDATE
+    WHERE userId = #{userId}
+  </update>
+
+  <!-- findByAuthority: 권한이 NULL이면 기본값 USER 부여 NULLPOINT 방지 -->
+  <select id="findByAuthority" parameterType="string" resultType="string">
+	  SELECT NVL(r.authority, 'USER') AS authority
+	  FROM schoolmember m
+	  LEFT JOIN school_role sr ON m.schoolId = sr.schoolId
+	  LEFT JOIN role r ON sr.roleId = r.roleId
+	  WHERE m.userId = #{userId}
+  </select>
+
+<insert id="insertSchoolMember" parameterType="com.sp.app.model.SchoolMember">
+  <!-- 시퀀스 값을 미리 조회하여 schoolId에 할당 (BEFORE 방식) -->
+  <selectKey keyProperty="schoolId" resultType="long" order="BEFORE">
+    SELECT school_seq.NEXTVAL FROM dual
+  </selectKey>
+  
+  INSERT INTO schoolmember (
+    schoolId,
+    userId,
+    userPwd,
+    userName,
+    gender,
+    enabled,
+    email,
+    tel,
+    zip,
+    addr1,
+    addr2,
+    receiveEmail,
+    ipAddr
+  )
+  VALUES (
+    #{schoolId},
+    #{userId},
+    #{userPwd},
+    #{userName},
+    #{gender},
+    1,
+    #{email,jdbcType=VARCHAR},
+    #{tel,jdbcType=VARCHAR},
+    #{zip,jdbcType=VARCHAR},
+    #{addr1,jdbcType=VARCHAR},
+    #{addr2,jdbcType=VARCHAR},
+    #{receiveEmail,jdbcType=NUMERIC},
+    #{ipAddr,jdbcType=VARCHAR}
+  )
+</insert>
+
+
+
+  <!-- 구성원의 권한 정보를 저장 (school_role 테이블에 등록) -->
+<insert id="insertAuthority" parameterType="com.sp.app.model.SchoolMember">
+  INSERT INTO school_role (schoolId, roleId)
+  VALUES (
+    #{schoolId},
+    (SELECT roleId FROM role WHERE authority = #{authority} AND ROWNUM = 1)
+  )
+</insert>
+
+</mapper>

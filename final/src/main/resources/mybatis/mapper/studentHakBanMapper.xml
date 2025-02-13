@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sp.app.mapper.StudentHakBanMapper">
+
+  <!-- 학생-학년반 관계 등록 -->
+  <insert id="insertStudentHakBan" parameterType="com.sp.app.model.StudentHakBan">
+    INSERT INTO studentHakBan (hakBanNum, studentId)
+    VALUES (#{hakBanNum}, #{studentId})
+  </insert>
+
+  <!-- 학생-학년반 관계 수정 (필요 시; 보통 관계 테이블은 수정이 자주 필요하지 않음) -->
+  <update id="updateStudentHakBan" parameterType="com.sp.app.model.StudentHakBan">
+    UPDATE studentHakBan
+    SET hakBanNum = #{hakBanNum},  -- 보통 변경되지 않음
+        studentId = #{studentId}   -- 보통 변경되지 않음
+    WHERE hakBanNum = #{hakBanNum} AND studentId = #{studentId}
+  </update>
+
+  <!-- 학생-학년반 관계 삭제 -->
+  <delete id="deleteStudentHakBan" parameterType="map">
+    DELETE FROM studentHakBan
+    WHERE hakBanNum = #{hakBanNum} AND studentId = #{studentId}
+  </delete>
+
+  <!-- 단건 조회 (복합키: hakBanNum, studentId) -->
+  <select id="findStudentHakBan" parameterType="map" resultType="com.sp.app.model.StudentHakBan">
+    SELECT hakBanNum, studentId
+    FROM studentHakBan
+    WHERE hakBanNum = #{hakBanNum} AND studentId = #{studentId}
+  </select>
+
+  <!-- 목록 조회 (예: 특정 학년반에 속한 학생들, 또는 특정 학생의 학년반 정보) -->
+  <select id="listStudentHakBan" parameterType="map" resultType="com.sp.app.model.StudentHakBan">
+    SELECT hakBanNum, studentId
+    FROM studentHakBan
+    <where>
+      <if test="hakBanNum != null">
+        AND hakBanNum = #{hakBanNum}
+      </if>
+      <if test="studentId != null">
+        AND studentId = #{studentId}
+      </if>
+    </where>
+    ORDER BY hakBanNum, studentId
+  </select>
+
+  <!-- 데이터 건수 조회 (페이징 등에서 활용) -->
+  <select id="dataCount" parameterType="map" resultType="int">
+    SELECT COUNT(*)
+    FROM studentHakBan
+    <where>
+      <if test="hakBanNum != null">
+        AND hakBanNum = #{hakBanNum}
+      </if>
+      <if test="studentId != null">
+        AND studentId = #{studentId}
+      </if>
+    </where>
+  </select>
+
+</mapper>

@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sp.app.mapper.CommunityReplyMapper">
+  
+  <!-- 시퀀스 값 반환 -->
+  <select id="CommunitySeq" resultType="long">
+    SELECT communityReply_seq.NEXTVAL FROM dual
+  </select>
+
+  <!-- 댓글 등록 -->
+  <insert id="insertCommunityReply" parameterType="com.sp.app.model.CommunityReply">
+    INSERT INTO communityReply (replyNum, communityNum, studentId, content, reg_date, parentNum, showReply, showCommunityReply)
+    VALUES (communityReply_seq.NEXTVAL, #{communityNum}, #{studentId}, #{content}, SYSDATE, #{parentNum}, #{showReply}, #{showCommunityReply})
+  </insert>
+  
+  <!-- 댓글 수정 -->
+  <update id="updateCommunityReply" parameterType="com.sp.app.model.CommunityReply">
+    UPDATE communityReply
+    SET content = #{content},
+        modify_date = SYSDATE,
+        showReply = #{showReply},
+        showCommunityReply = #{showCommunityReply}
+    WHERE replyNum = #{replyNum}
+  </update>
+  
+  <!-- 댓글 삭제 -->
+  <delete id="deleteCommunityReply" parameterType="com.sp.app.model.CommunityReply">
+    DELETE FROM communityReply
+    WHERE replyNum = #{replyNum}
+  </delete>
+  
+  <!-- 댓글 순서 업데이트 (orderNo 갱신) -->
+  <update id="updateOrderNo" parameterType="map">
+    UPDATE communityReply
+    SET orderNo = #{orderNo}
+    WHERE replyNum = #{replyNum}
+  </update>
+  
+  <!-- 댓글 데이터 건수 조회 -->
+  <select id="dataCount" parameterType="map" resultType="int">
+    SELECT COUNT(*) 
+    FROM communityReply
+    <where>
+      <if test="communityNum != null">
+         AND communityNum = #{communityNum}
+      </if>
+    </where>
+  </select>
+  
+  <!-- 댓글 목록 조회 -->
+  <select id="listCommunityReply" parameterType="map" resultType="com.sp.app.model.CommunityReply">
+    SELECT replyNum, communityNum, studentId, content,
+           TO_CHAR(reg_date, 'YYYY-MM-DD') AS reg_date,
+           TO_CHAR(modify_date, 'YYYY-MM-DD') AS modify_date,
+           parentNum, showReply, showCommunityReply
+    FROM communityReply
+    <where>
+      <if test="communityNum != null">
+         AND communityNum = #{communityNum}
+      </if>
+    </where>
+    ORDER BY replyNum ASC
+  </select>
+  
+  <!-- 댓글 단건 조회 -->
+  <select id="findById" parameterType="long" resultType="com.sp.app.model.CommunityReply">
+    SELECT replyNum, communityNum, studentId, content,
+           TO_CHAR(reg_date, 'YYYY-MM-DD') AS reg_date,
+           TO_CHAR(modify_date, 'YYYY-MM-DD') AS modify_date,
+           parentNum, showReply, showCommunityReply
+    FROM communityReply
+    WHERE replyNum = #{replyNum}
+  </select>
+  
+  <!-- (옵션) 댓글 조회수 증가 (hitCount 필드가 있다면) -->
+  <update id="updateHitCount" parameterType="long">
+    UPDATE communityReply
+    SET hitCount = hitCount + 1
+    WHERE replyNum = #{boardNum}
+  </update>
+  
+  <!-- 이전 댓글 조회 -->
+  <select id="findByPrev" parameterType="map" resultType="com.sp.app.model.CommunityReply">
+    SELECT *
+    FROM (
+      SELECT *
+      FROM communityReply
+      <where>
+         <if test="replyNum != null">
+            AND replyNum &lt; #{replyNum}
+         </if>
+         <if test="communityNum != null">
+            AND communityNum = #{communityNum}
+         </if>
+      </where>
+      ORDER BY replyNum DESC
+    )
+    WHERE ROWNUM = 1
+  </select>
+  
+  <!-- 다음 댓글 조회 -->
+  <select id="findByNext" parameterType="map" resultType="com.sp.app.model.CommunityReply">
+    SELECT *
+    FROM (
+      SELECT *
+      FROM communityReply
+      <where>
+         <if test="replyNum != null">
+            AND replyNum &gt; #{replyNum}
+         </if>
+         <if test="communityNum != null">
+            AND communityNum = #{communityNum}
+         </if>
+      </where>
+      ORDER BY replyNum ASC
+    )
+    WHERE ROWNUM = 1
+  </select>
+
+</mapper>

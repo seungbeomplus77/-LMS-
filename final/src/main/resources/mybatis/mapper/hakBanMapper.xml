@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sp.app.mapper.HakBanMapper">
+	  <!-- 학년-반 등록 -->
+  <insert id="insertHakBan" parameterType="com.sp.app.model.HakBan">
+    INSERT INTO HakBan (hakBanNum, hak, ban, teacherId)
+    VALUES (hakBan_seq.nextval, #{hak}, #{ban}, #{teacherId})
+  </insert>
+
+  <!-- 학년-반 수정 -->
+  <update id="updateHakBan" parameterType="com.sp.app.model.HakBan">
+    UPDATE HakBan
+    SET hak = #{hak},
+        ban = #{ban},
+        teacherId = #{teacherId}
+    WHERE hakBanNum = #{hakBanNum}
+  </update>
+
+  <!-- 학년-반 삭제 -->
+  <delete id="deleteHakBan" parameterType="long">
+    DELETE FROM HakBan
+    WHERE hakBanNum = #{hakBanNum}
+  </delete>
+
+  <!-- 단건 조회 (hakBanNum 기준) -->
+  <select id="findHakBanById" parameterType="long" resultType="com.sp.app.model.HakBan">
+    SELECT hakBanNum, hak, ban, teacherId
+    FROM HakBan
+    WHERE hakBanNum = #{hakBanNum}
+  </select>
+
+  <!-- 목록 조회 -->
+  <select id="listHakBan" resultType="com.sp.app.model.HakBan">
+    SELECT hakBanNum, hak, ban, teacherId
+    FROM HakBan
+    ORDER BY hakBanNum
+  </select>
+</mapper>

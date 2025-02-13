@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sp.app.mapper.TeacherMapper">
+
+  <!-- 교사 정보 등록 -->
+  <insert id="insertTeacher" parameterType="com.sp.app.model.Teacher">
+    INSERT INTO teacher (schoolId, hireDate, retireDate, position)
+    VALUES (#{schoolId}, TO_DATE(#{hireDate}, 'YYYY-MM-DD'),
+            <if test="retireDate != null and retireDate != ''">
+              TO_DATE(#{retireDate}, 'YYYY-MM-DD')
+            </if>
+            <if test="retireDate == null or retireDate == ''">NULL</if>,
+            #{position})
+  </insert>
+  
+  <!-- 교사 정보 수정 -->
+  <update id="updateTeacher" parameterType="com.sp.app.model.Teacher">
+    UPDATE teacher
+    SET hireDate = TO_DATE(#{hireDate}, 'YYYY-MM-DD'),
+        retireDate =
+          <if test="retireDate != null and retireDate != ''">
+            TO_DATE(#{retireDate}, 'YYYY-MM-DD')
+          </if>
+          <if test="retireDate == null or retireDate == ''">NULL</if>,
+        position = #{position}
+    WHERE schoolId = #{schoolId}
+  </update>
+  
+  <!-- 교사 정보 삭제 -->
+  <delete id="deleteTeacher" parameterType="long">
+    DELETE FROM teacher
+    WHERE schoolId = #{schoolId}
+  </delete>
+  
+  <!-- 교사 정보 단건 조회 -->
+  <select id="findTeacherById" parameterType="long" resultType="com.sp.app.model.Teacher">
+    SELECT schoolId,
+           TO_CHAR(hireDate, 'YYYY-MM-DD') AS hireDate,
+           TO_CHAR(retireDate, 'YYYY-MM-DD') AS retireDate,
+           position
+    FROM teacher
+    WHERE schoolId = #{schoolId}
+  </select>
+  
+  <!-- 교사 목록 조회 (조건 검색 등) -->
+  <select id="listTeacher" parameterType="map" resultType="com.sp.app.model.Teacher">
+    SELECT schoolId,
+           TO_CHAR(hireDate, 'YYYY-MM-DD') AS hireDate,
+           TO_CHAR(retireDate, 'YYYY-MM-DD') AS retireDate,
+           position
+    FROM teacher
+    <where>
+      <if test="keyword != null and keyword != ''">
+        AND position LIKE '%' || #{keyword} || '%'
+      </if>
+    </where>
+    ORDER BY schoolId DESC
+  </select>
+  
+</mapper>

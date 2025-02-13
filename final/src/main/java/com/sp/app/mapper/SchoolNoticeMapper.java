@@ -30,6 +30,6 @@ public interface SchoolNoticeMapper {
     public int dataCount(Map<String, Object> map) throws SQLException;
     
 	public void updateHitCount(long schoolNoticeNum) throws SQLException;
-	public EnterGuide findByPrev(Map<String, Object> map);
-	public EnterGuide findByNext(Map<String, Object> map);
+	public SchoolNotice findByPrev(Map<String, Object> map);
+	public SchoolNotice findByNext(Map<String, Object> map);
 }

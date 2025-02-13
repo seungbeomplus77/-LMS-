@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sp.app.mapper.CommunityReportMapper">
+  <!-- 신고 등록 -->
+  <insert id="insertCommunityReport" parameterType="com.sp.app.model.CommunityReport">
+    INSERT INTO communityReport
+      (reportNum, communityNum, studentId, reportReason, reportDate, reportStatus)
+    VALUES
+      (communityReport_seq.nextval, #{communityNum}, #{studentId}, #{reportReason}, SYSDATE, #{reportStatus})
+  </insert>
+  
+  <!-- 신고 수정 (신고 처리 상태 업데이트 등) -->
+  <update id="updateCommunityReport" parameterType="com.sp.app.model.CommunityReport">
+    UPDATE communityReport
+    SET communityNum = #{communityNum},
+        studentId = #{studentId},
+        reportReason = #{reportReason},
+        reportDate = SYSDATE,
+        reportStatus = #{reportStatus}
+    WHERE reportNum = #{reportNum}
+  </update>
+  
+  <!-- 신고 삭제 -->
+  <delete id="deleteCommunityReport" parameterType="long">
+    DELETE FROM communityReport
+    WHERE reportNum = #{reportNum}
+  </delete>
+  
+  <!-- 신고 단건 조회 -->
+  <select id="findCommunityReportById" parameterType="long" resultType="com.sp.app.model.CommunityReport">
+    SELECT reportNum, communityNum, studentId, reportReason,
+           TO_CHAR(reportDate, 'YYYY-MM-DD') AS reportDate,
+           reportStatus
+    FROM communityReport
+    WHERE reportNum = #{reportNum}
+  </select>
+  
+  <!-- 신고 목록 조회 (필터 조건 포함) -->
+  <select id="listCommunityReports" parameterType="map" resultType="com.sp.app.model.CommunityReport">
+    SELECT reportNum, communityNum, studentId, reportReason,
+           TO_CHAR(reportDate, 'YYYY-MM-DD') AS reportDate,
+           reportStatus
+    FROM communityReport
+    <where>
+      <if test="communityNum != null">
+        AND communityNum = #{communityNum}
+      </if>
+      <if test="studentId != null">
+        AND studentId = #{studentId}
+      </if>
+      <if test="reportStatus != null">
+        AND reportStatus = #{reportStatus}
+      </if>
+    </where>
+    ORDER BY reportNum DESC
+  </select>
+
+</mapper>

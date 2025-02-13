@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sp.app.mapper.CampusLectureMapper">
+    
+    <!-- 강의 등록 -->
+    <insert id="insertCampusLecture" parameterType="com.sp.app.model.CampusLecture">
+      INSERT INTO campusLecture 
+        (lectureId, subjectId, teacherId, lectureTitle, lectureContent, youtube, hitCount, reg_date, modify_date, showLecture)
+      VALUES
+        (campusLecture_seq.NEXTVAL, #{subjectId}, #{teacherId}, #{lectureTitle}, #{lectureContent}, #{youtube}, #{hitCount}, 
+         TO_DATE(#{reg_date}, 'YYYY-MM-DD'), TO_DATE(#{modify_date}, 'YYYY-MM-DD'), #{showLecture})
+    </insert>
+
+    <!-- 강의 수정 -->
+    <update id="updateCampusLecture" parameterType="com.sp.app.model.CampusLecture">
+      UPDATE campusLecture
+      SET subjectId = #{subjectId},
+          teacherId = #{teacherId},
+          lectureTitle = #{lectureTitle},
+          lectureContent = #{lectureContent},
+          youtube = #{youtube},
+          hitCount = #{hitCount},
+          reg_date = TO_DATE(#{reg_date}, 'YYYY-MM-DD'),
+          modify_date = TO_DATE(#{modify_date}, 'YYYY-MM-DD'),
+          showLecture = #{showLecture}
+      WHERE lectureId = #{lectureId}
+    </update>
+
+    <!-- 강의 삭제 -->
+    <delete id="deleteCampusLecture" parameterType="map">
+      DELETE FROM campusLecture
+      WHERE lectureId = #{lectureId}
+    </delete>
+
+    <!-- 강의 목록 조회 -->
+    <select id="listCampusLecture" parameterType="map" resultType="com.sp.app.model.CampusLecture">
+      SELECT lectureId, subjectId, teacherId, lectureTitle, lectureContent, youtube, hitCount,
+             TO_CHAR(reg_date, 'YYYY-MM-DD') AS reg_date,
+             TO_CHAR(modify_date, 'YYYY-MM-DD') AS modify_date,
+             showLecture
+      FROM campusLecture
+      <where>
+         <if test="subjectId != null">
+           AND subjectId = #{subjectId}
+         </if>
+         <if test="teacherId != null">
+           AND teacherId = #{teacherId}
+         </if>
+         <!-- 추가 조건 필요 시 -->
+      </where>
+      ORDER BY lectureId DESC
+    </select>
+
+    <!-- 단건 조회 -->
+    <select id="findById" parameterType="long" resultType="com.sp.app.model.CampusLecture">
+      SELECT lectureId, subjectId, teacherId, lectureTitle, lectureContent, youtube, hitCount,
+             TO_CHAR(reg_date, 'YYYY-MM-DD') AS reg_date,
+             TO_CHAR(modify_date, 'YYYY-MM-DD') AS modify_date,
+             showLecture
+      FROM campusLecture
+      WHERE lectureId = #{lectureId}
+    </select>
+
+    <!-- 조회수 증가 -->
+    <update id="updateHitCount" parameterType="long">
+      UPDATE campusLecture
+      SET hitCount = hitCount + 1
+      WHERE lectureId = #{lectureId}
+    </update>
+
+    <!-- 데이터 건수 조회 -->
+    <select id="dataCount" parameterType="map" resultType="int">
+      SELECT COUNT(*)
+      FROM campusLecture
+      <where>
+         <if test="subjectId != null">
+           AND subjectId = #{subjectId}
+         </if>
+         <if test="teacherId != null">
+           AND teacherId = #{teacherId}
+         </if>
+      </where>
+    </select>
+
+</mapper>

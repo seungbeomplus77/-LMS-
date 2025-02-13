@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sp.app.mapper.StudentMapper">
+
+  <!-- 학생 정보 등록 -->
+  <insert id="insertStudent" parameterType="com.sp.app.model.Student">
+    INSERT INTO student (schoolId, enterDate, graduateDate)
+    VALUES (#{schoolId}, TO_DATE(#{enterDate}, 'YYYY-MM-DD'), TO_DATE(#{graduateDate}, 'YYYY-MM-DD'))
+  </insert>
+  
+  <!-- 학생 정보 수정 -->
+  <update id="updateStudent" parameterType="com.sp.app.model.Student">
+    UPDATE student
+    SET enterDate = TO_DATE(#{enterDate}, 'YYYY-MM-DD'),
+        graduateDate = TO_DATE(#{graduateDate}, 'YYYY-MM-DD')
+    WHERE schoolId = #{schoolId}
+  </update>
+  
+  <!-- 학생 정보 삭제 -->
+  <delete id="deleteStudent" parameterType="long">
+    DELETE FROM student
+    WHERE schoolId = #{schoolId}
+  </delete>
+  
+  <!-- 학생 정보 단건 조회 -->
+  <select id="findStudentById" parameterType="long" resultType="com.sp.app.model.Student">
+    SELECT schoolId,
+           TO_CHAR(enterDate, 'YYYY-MM-DD') AS enterDate,
+           TO_CHAR(graduateDate, 'YYYY-MM-DD') AS graduateDate
+    FROM student
+    WHERE schoolId = #{schoolId}
+  </select>
+  
+  <!-- 학생 목록 조회 (조건 검색 등) -->
+  <select id="listStudent" parameterType="map" resultType="com.sp.app.model.Student">
+    SELECT schoolId,
+           TO_CHAR(enterDate, 'YYYY-MM-DD') AS enterDate,
+           TO_CHAR(graduateDate, 'YYYY-MM-DD') AS graduateDate
+    FROM student
+    <where>
+      <if test="keyword != null and keyword != ''">
+        AND TO_CHAR(enterDate, 'YYYY-MM-DD') LIKE '%' || #{keyword} || '%'
+      </if>
+    </where>
+    ORDER BY schoolId DESC
+  </select>
+  
+</mapper>

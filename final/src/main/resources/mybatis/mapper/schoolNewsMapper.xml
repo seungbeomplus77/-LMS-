@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sp.app.mapper.SchoolNewsMapper">
+  <!-- 학교소식 글 등록 -->
+  <insert id="insertSchoolNews" parameterType="com.sp.app.model.SchoolNews">
+    INSERT INTO schoolNews 
+      (schoolNewsNum, subject, content, hitCount, saveFilename, originalFilename, reg_date, modify_date, showSchoolNews, schoolId)
+    VALUES 
+      (schoolNews_seq.nextval, #{subject}, #{content}, #{hitCount}, #{saveFilename}, #{originalFilename}, SYSDATE, SYSDATE, #{showSchoolNews}, #{schoolId})
+  </insert>
+  
+  <!-- 학교소식 글 수정 -->
+  <update id="updateSchoolNews" parameterType="com.sp.app.model.SchoolNews">
+    UPDATE schoolNews
+    SET subject = #{subject},
+        content = #{content},
+        hitCount = #{hitCount},
+        saveFilename = #{saveFilename},
+        originalFilename = #{originalFilename},
+        modify_date = SYSDATE,
+        showSchoolNews = #{showSchoolNews},
+        schoolId = #{schoolId}
+    WHERE schoolNewsNum = #{schoolNewsNum}
+  </update>
+  
+  <!-- 학교소식 글 삭제 -->
+  <delete id="deleteSchoolNews" parameterType="long">
+    DELETE FROM schoolNews
+    WHERE schoolNewsNum = #{schoolNewsNum}
+  </delete>
+  
+  <!-- 단건 조회 (PK 기준) -->
+  <select id="findSchoolNewsById" parameterType="long" resultType="com.sp.app.model.SchoolNews">
+    SELECT schoolNewsNum,
+           subject,
+           content,
+           hitCount,
+           saveFilename,
+           originalFilename,
+           TO_CHAR(reg_date, 'YYYY-MM-DD') AS reg_date,
+           TO_CHAR(modify_date, 'YYYY-MM-DD') AS modify_date,
+           showSchoolNews,
+           schoolId
+    FROM schoolNews
+    WHERE schoolNewsNum = #{schoolNewsNum}
+  </select>
+  
+  <!-- 조건에 따른 학교소식 글 목록 조회 -->
+  <select id="listSchoolNews" parameterType="map" resultType="com.sp.app.model.SchoolNews">
+    SELECT schoolNewsNum,
+           subject,
+           content,
+           hitCount,
+           saveFilename,
+           originalFilename,
+           TO_CHAR(reg_date, 'YYYY-MM-DD') AS reg_date,
+           TO_CHAR(modify_date, 'YYYY-MM-DD') AS modify_date,
+           showSchoolNews,
+           schoolId
+    FROM schoolNews
+    <where>
+      <if test="schoolId != null">
+        AND schoolId = #{schoolId}
+      </if>
+      <if test="keyword != null and keyword != ''">
+        AND subject LIKE '%' || #{keyword} || '%'
+      </if>
+    </where>
+    ORDER BY schoolNewsNum DESC
+  </select>
+  
+  <!-- 데이터 건수 조회 (페이징 등) -->
+  <select id="dataCount" parameterType="map" resultType="int">
+    SELECT COUNT(*)
+    FROM schoolNews
+    <where>
+      <if test="schoolId != null">
+        AND schoolId = #{schoolId}
+      </if>
+      <if test="keyword != null and keyword != ''">
+        AND subject LIKE '%' || #{keyword} || '%'
+      </if>
+    </where>
+  </select>
+  
+  <!-- 조회수 업데이트 -->
+  <update id="updateHitCount" parameterType="long">
+    UPDATE schoolNews
+    SET hitCount = hitCount + 1
+    WHERE schoolNewsNum = #{schoolNewsNum}
+  </update>
+  
+  <!-- 이전 글 조회 -->
+  <select id="findByPrev" parameterType="map" resultType="com.sp.app.model.SchoolNews">
+    SELECT *
+    FROM (
+      SELECT schoolNewsNum,
+             subject,
+             content,
+             hitCount,
+             saveFilename,
+             originalFilename,
+             TO_CHAR(reg_date, 'YYYY-MM-DD') AS reg_date,
+             TO_CHAR(modify_date, 'YYYY-MM-DD') AS modify_date,
+             showSchoolNews,
+             schoolId
+      FROM schoolNews
+      <where>
+         <if test="schoolNewsNum != null">
+           AND schoolNewsNum &lt; #{schoolNewsNum}
+         </if>
+         <if test="keyword != null and keyword != ''">
+           AND subject LIKE '%' || #{keyword} || '%'
+         </if>
+      </where>
+      ORDER BY schoolNewsNum DESC
+    )
+    WHERE ROWNUM = 1
+  </select>
+  
+  <!-- 다음 글 조회 -->
+  <select id="findByNext" parameterType="map" resultType="com.sp.app.model.SchoolNews">
+    SELECT *
+    FROM (
+      SELECT schoolNewsNum,
+             subject,
+             content,
+             hitCount,
+             saveFilename,
+             originalFilename,
+             TO_CHAR(reg_date, 'YYYY-MM-DD') AS reg_date,
+             TO_CHAR(modify_date, 'YYYY-MM-DD') AS modify_date,
+             showSchoolNews,
+             schoolId
+      FROM schoolNews
+      <where>
+         <if test="schoolNewsNum != null">
+           AND schoolNewsNum &gt; #{schoolNewsNum}
+         </if>
+         <if test="keyword != null and keyword != ''">
+           AND subject LIKE '%' || #{keyword} || '%'
+         </if>
+      </where>
+      ORDER BY schoolNewsNum ASC
+    )
+    WHERE ROWNUM = 1
+  </select>
+</mapper>

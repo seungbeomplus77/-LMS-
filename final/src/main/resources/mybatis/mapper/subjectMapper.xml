@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sp.app.mapper.SubjectMapper">
+
+  <!-- 통합 Subject 등록 -->
+  <insert id="insertSubject" parameterType="com.sp.app.model.Subject">
+    INSERT INTO subject (subjectId, subjectName, majorId, subId)
+    VALUES (subject_seq.nextval, #{subjectName}, #{majorId}, #{subId})
+  </insert>
+
+  <!-- 통합 Subject 수정 -->
+  <update id="updateSubject" parameterType="com.sp.app.model.Subject">
+    UPDATE subject
+    SET subjectName = #{subjectName},
+        majorId = #{majorId},
+        subId = #{subId}
+    WHERE subjectId = #{subjectId}
+  </update>
+
+  <!-- 통합 Subject 삭제 -->
+  <delete id="deleteSubject" parameterType="long">
+    DELETE FROM subject
+    WHERE subjectId = #{subjectId}
+  </delete>
+
+  <!-- 단일 조회 (과목 테이블과 대분류, 중분류 JOIN 결과) -->
+  <select id="findBySubjectId" parameterType="long" resultType="com.sp.app.model.Subject">
+    SELECT s.subjectId,
+           s.subjectName,
+           s.majorId,
+           s.subId,
+           m.majorName AS majorName,
+           sub.subName AS subName
+    FROM subject s
+    LEFT JOIN majorSubject m ON s.majorId = m.majorId
+    LEFT JOIN subSubject sub ON s.subId = sub.subId
+    WHERE s.subjectId = #{subjectId}
+  </select>
+
+  <!-- 목록 조회 (과목 통합 결과: subject, majorSubject, subSubject JOIN) -->
+  <select id="listSubject" resultType="com.sp.app.model.Subject">
+    SELECT s.subjectId,
+           s.subjectName,
+           s.majorId,
+           s.subId,
+           m.majorName AS majorName,
+           sub.subName AS subName
+    FROM subject s
+    LEFT JOIN majorSubject m ON s.majorId = m.majorId
+    LEFT JOIN subSubject sub ON s.subId = sub.subId
+    ORDER BY s.subjectId DESC
+  </select>
+
+</mapper>

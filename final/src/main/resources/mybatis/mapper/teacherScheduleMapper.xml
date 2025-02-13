@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sp.app.mapper.TeacherScheduleMapper">
+
+  <!-- 교사 일정 등록 -->
+  <insert id="insertTeacherSchedule" parameterType="com.sp.app.model.TeacherSchedule">
+    INSERT INTO teacherSchedule
+      (teacherScheduleNum, subject, color, startDate, endDate, startTime, endTime, repeat, repeat_cycle, memo, reg_date, teacherId, categoryId)
+    VALUES
+      (teacherSchedule_seq.nextval, #{subject}, #{color}, #{startDate}, #{endDate}, #{startTime}, #{endTime}, #{repeat}, #{repeat_cycle}, #{memo}, SYSDATE, #{teacherId}, #{categoryId})
+  </insert>
+  
+  <!-- 교사 일정 수정 -->
+  <update id="updateTeacherSchedule" parameterType="com.sp.app.model.TeacherSchedule">
+    UPDATE teacherSchedule
+    SET subject = #{subject},
+        color = #{color},
+        startDate = #{startDate},
+        endDate = #{endDate},
+        startTime = #{startTime},
+        endTime = #{endTime},
+        repeat = #{repeat},
+        repeat_cycle = #{repeat_cycle},
+        memo = #{memo},
+        teacherId = #{teacherId},
+        categoryId = #{categoryId}
+    WHERE teacherScheduleNum = #{teacherScheduleNum}
+  </update>
+  
+  <!-- 교사 일정 삭제 -->
+  <delete id="deleteTeacherSchedule" parameterType="long">
+    DELETE FROM teacherSchedule
+    WHERE teacherScheduleNum = #{teacherScheduleNum}
+  </delete>
+  
+  <!-- 교사 일정 단건 조회 -->
+  <select id="findTeacherScheduleById" parameterType="long" resultType="com.sp.app.model.TeacherSchedule">
+    SELECT teacherScheduleNum,
+           subject,
+           color,
+           startDate,
+           endDate,
+           startTime,
+           endTime,
+           repeat,
+           repeat_cycle,
+           memo,
+           TO_CHAR(reg_date, 'YYYY-MM-DD') AS reg_date,
+           teacherId,
+           categoryId
+    FROM teacherSchedule
+    WHERE teacherScheduleNum = #{teacherScheduleNum}
+  </select>
+  
+  <!-- 조건에 따른 교사 일정 목록 조회 -->
+  <select id="listTeacherSchedule" parameterType="map" resultType="com.sp.app.model.TeacherSchedule">
+    SELECT teacherScheduleNum,
+           subject,
+           color,
+           startDate,
+           endDate,
+           startTime,
+           endTime,
+           repeat,
+           repeat_cycle,
+           memo,
+           TO_CHAR(reg_date, 'YYYY-MM-DD') AS reg_date,
+           teacherId,
+           categoryId
+    FROM teacherSchedule
+    <where>
+      <if test="teacherId != null">
+        AND teacherId = #{teacherId}
+      </if>
+      <if test="keyword != null and keyword != ''">
+        AND subject LIKE '%' || #{keyword} || '%'
+      </if>
+    </where>
+    ORDER BY teacherScheduleNum DESC
+  </select>
+  
+  <!-- 데이터 건수 조회 -->
+  <select id="dataCount" parameterType="map" resultType="int">
+    SELECT COUNT(*)
+    FROM teacherSchedule
+    <where>
+      <if test="teacherId != null">
+        AND teacherId = #{teacherId}
+      </if>
+      <if test="keyword != null and keyword != ''">
+        AND subject LIKE '%' || #{keyword} || '%'
+      </if>
+    </where>
+  </select>
+  
+</mapper>

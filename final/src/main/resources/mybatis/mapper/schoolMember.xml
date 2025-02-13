@@ -135,8 +135,6 @@
   )
 </insert>
 
-
-
   <!-- 구성원의 권한 정보를 저장 (school_role 테이블에 등록) -->
 <insert id="insertAuthority" parameterType="com.sp.app.model.SchoolMember">
   INSERT INTO school_role (schoolId, roleId)

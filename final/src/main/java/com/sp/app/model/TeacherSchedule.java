@@ -7,8 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class StudySchedule {
-    private long studentScheduleNum;
+public class TeacherSchedule {
     private long teacherScheduleNum;
     private String subject;
     private String color;
@@ -22,6 +21,5 @@ public class StudySchedule {
     private String regDate;
     
     private long teacherId;
-    private long studentId;
     private long categoryId;
 }

@@ -8,7 +8,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class HakBan {
-    private Long hakBanNum;
+    private long hakBanNum;
     private String hak;
     private String ban;
     

@@ -12,7 +12,7 @@ public class CampusLecture {
     private long subjectId;
     private String lectureTitle; // 제목
     private String lectureContent; // 내용
-    private Integer hitCount; // 조회수
+    private int hitCount; // 조회수
     private String youtube;
     private String reg_date; // 등록날짜
     private String modify_date; // 수정날짜

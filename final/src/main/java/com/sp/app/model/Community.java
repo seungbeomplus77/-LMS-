@@ -16,7 +16,7 @@ public class Community {
     private String modify_date; // 수정날짜
     private int showCommunity  ; // 글 숨김 여부 (1: 안 숨김, 0: 숨김)
 
-    
+    private int communityLike; // 좋아요
     private long studentId; // schoolmember
     private long categoryNum;
 }

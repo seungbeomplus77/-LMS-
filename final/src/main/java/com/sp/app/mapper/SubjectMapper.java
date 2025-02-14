@@ -2,6 +2,7 @@ package com.sp.app.mapper;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
 
@@ -22,5 +23,5 @@ public interface SubjectMapper {
     public Subject findBySubjectId(long subjectId) throws SQLException;
     
     // 목록 조회 (JOIN된 통합 결과)
-    public List<Subject> listSubject() throws SQLException;
+    public List<Subject> listSubject(Map<String, Object> map) throws SQLException;
 }

@@ -9,7 +9,7 @@ import org.apache.ibatis.annotations.Mapper;
 import com.sp.app.model.StudentHakBan;
 
 @Mapper
-public interface StdentHakBanMapper {
+public interface StudentHakBanMapper {
     // 학생-학년반 관계 등록
     public void insertStudentHakBan(StudentHakBan dto) throws SQLException;
     

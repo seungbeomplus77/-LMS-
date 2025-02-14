@@ -7,8 +7,7 @@ import com.sp.app.model.StudentSchedule;
 public interface StudentScheduleService {
     public void insertStudentSchedule(StudentSchedule dto) throws Exception;
     public void updateStudentSchedule(StudentSchedule dto) throws Exception;
-    public void deleteStudentSchedule(long studentScheduleNum) throws Exception;
+    public void deleteStudentSchedule(Map<String, Object> map) throws Exception;
     public StudentSchedule findStudentScheduleById(long studentScheduleNum) throws Exception;
     public List<StudentSchedule> listStudentSchedule(Map<String, Object> map) throws Exception;
-    public int studentScheduleDataCount(Map<String, Object> map) throws Exception;
 }

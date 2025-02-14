@@ -12,6 +12,4 @@ public interface CampusLectureService {
     public CampusLecture findCampusLectureById(long lectureId) throws Exception;
     public void updateCampusLectureHitCount(long lectureId) throws Exception;
     public int campusLectureDataCount(Map<String, Object> map) throws Exception;
-    public CampusLecture findPrevCampusLecture(Map<String, Object> map) throws Exception;
-    public CampusLecture findNextCampusLecture(Map<String, Object> map) throws Exception;
 }

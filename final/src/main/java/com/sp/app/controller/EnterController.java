@@ -3,6 +3,7 @@ package com.sp.app.controller;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.stereotype.Controller;
@@ -14,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.sp.app.common.MyUtil;
 import com.sp.app.common.PaginateUtil;
 import com.sp.app.common.StorageService;
+import com.sp.app.model.EnterGuide;
+import com.sp.app.service.EnterGuideService;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,6 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequestMapping("/enter/*")
 public class EnterController {
+	private final EnterGuideService service;
 	private final StorageService storageService;
 	private final PaginateUtil paginateUtil;
 	private final MyUtil myUtil;
@@ -34,7 +38,7 @@ public class EnterController {
 	@PostConstruct // 생성자 호출 후 한번 실행
 	public void init() {
 		// 파일을 저장할 실제 경로
-		uploadPath = storageService.getRealPath("/uploads/bbs");
+		uploadPath = storageService.getRealPath("/uploads/file");
 	}
 	
 	@GetMapping("main")
@@ -52,13 +56,22 @@ public class EnterController {
 			
 			kwd = URLDecoder.decode(kwd, "utf-8");
 			
-			Map<String, Object> map = new HashMap<>();
+			Map<String, Object> map = new HashMap<String, Object>();
 			map.put("schType", schType);
 			map.put("kwd", kwd);
 			
-			total_page = paginateUtil.pageCount(dataCount, size);
+			dataCount = service.enterGuideDataCount(map);
+			
+			if(dataCount != 0) {
+				total_page = paginateUtil.pageCount(dataCount, size);
+			}
 			
 			current_page = Math.min(current_page, total_page);
+			
+			List<EnterGuide> list = null;
+			if(current_page == 1) {
+				list = service.listEnterGuide(map);
+			}
 			
 			int offset = (current_page - 1) * size;
 			if(offset < 0) offset = 0;
@@ -66,32 +79,36 @@ public class EnterController {
 			map.put("offset", offset);
 			map.put("size", size);
 			
+			List<EnterGuide> enterGuideList = service.listEnterGuide(map);
+			
 			String cp = req.getContextPath();
-			String query = "page=" + current_page;
-			String listUrl = cp + "/bbs/list";
-			String articleUrl = cp + "/bbs/article";
+			String query = "";
+			String listUrl = cp + "/enter/list";
+			String articleUrl = cp + "/enter/article";
 			
 			if(! kwd.isBlank()) {
-				String qs = "schType=" + schType + "&kwd=" +
-						URLEncoder.encode(kwd, "utf-8");
-				
-				listUrl += "?" + qs;
-				query += "&" + qs;
+				query = "schType=" + schType + "&kwd=" + URLEncoder.encode(kwd, "utf-8");
+
+				listUrl += "?" + query;
+				articleUrl += "&" + query;
 			}
 			
 			String paging = paginateUtil.paging(current_page, 
 					total_page, listUrl);
-		
+			
+			model.addAttribute("enterGuideList", enterGuideList);
+			model.addAttribute("list", list);
 			model.addAttribute("dataCount", dataCount);
 			model.addAttribute("size", size);
 			model.addAttribute("page", current_page);
 			model.addAttribute("total_page", total_page);
 			model.addAttribute("articleUrl", articleUrl);
 			model.addAttribute("paging", paging);
+			model.addAttribute("query", query);
+			
 			
 			model.addAttribute("schType", schType);
 			model.addAttribute("kwd", kwd);
-			model.addAttribute("query", query);
 			
 		} catch (Exception e) {
 			log.info("main : ", e);

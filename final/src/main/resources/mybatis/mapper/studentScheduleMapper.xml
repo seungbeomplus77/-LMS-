@@ -86,21 +86,4 @@
     ORDER BY studentScheduleNum DESC
   </select>
   
-  <!-- 데이터 건수 조회 -->
-  <select id="dataCount" parameterType="map" resultType="int">
-    SELECT COUNT(*)
-    FROM studentSchedule
-    <where>
-      <if test="studentId != null">
-        AND studentId = #{studentId}
-      </if>
-      <if test="teacherId != null">
-        AND teacherId = #{teacherId}
-      </if>
-      <if test="keyword != null and keyword != ''">
-        AND subject LIKE '%' || #{keyword} || '%'
-      </if>
-    </where>
-  </select>
-  
 </mapper>

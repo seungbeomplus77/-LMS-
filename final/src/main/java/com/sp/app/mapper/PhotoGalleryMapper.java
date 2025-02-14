@@ -16,8 +16,8 @@ public interface PhotoGalleryMapper {
     // 포토갤러리 수정
     public void updatePhotoGallery(PhotoGallery dto) throws SQLException;
     
-    // 포토갤러리 삭제 (삭제 조건이 여러 개라면 Map을 사용)
-    public void deletePhotoGallery(Map<String, Object> map) throws SQLException;
+    // 포토갤러리 삭제
+    public void deletePhotoGallery(long photoGalleryNum) throws SQLException;
     
     // 포토갤러리 단건 조회 (primary key 기준)
     public PhotoGallery findPhotoGalleryById(long photoGalleryNum) throws SQLException;

@@ -20,6 +20,12 @@ public class StudentSchedule {
     private String memo;
     private String regDate;
     
+    private String all_day;
+    
     private long studentId;
     private long categoryId;
+    
+	// FullCalendar 에서 사용하는 필드
+	private String start;
+	private String end;
 }

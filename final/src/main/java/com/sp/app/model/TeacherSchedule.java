@@ -22,4 +22,10 @@ public class TeacherSchedule {
     
     private long teacherId;
     private long categoryId;
+    
+    private String all_day;
+	
+    // FullCalendar 에서 사용하는 필드
+	private String start;
+	private String end;
 }

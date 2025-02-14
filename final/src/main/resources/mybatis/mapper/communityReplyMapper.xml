@@ -117,5 +117,41 @@
     )
     WHERE ROWNUM = 1
   </select>
+  
+    <!-- 댓글 좋아요/싫어요 등록 -->
+  <insert id="insertReplyLike" parameterType="map">
+    INSERT INTO communityReplyLike (replyNum, studentId, replyLike)
+    VALUES (#{replyNum}, #{studentId}, #{replyLike})
+  </insert>
+  
+  <!-- 댓글 좋아요/싫어요 삭제 -->
+  <delete id="deleteReply" parameterType="map">
+    DELETE FROM communityReplyLike
+    WHERE replyNum = #{replyNum} AND studentId = #{studentId}
+  </delete>
+  
+  <!-- 댓글 좋아요/싫어요 수 조회 -->
+  <select id="replyLikeCount" parameterType="map" resultType="map">
+    SELECT replyNum,
+           SUM(CASE WHEN replyLike = 1 THEN 1 ELSE 0 END) AS likeCount,
+           SUM(CASE WHEN replyLike = 0 THEN 1 ELSE 0 END) AS disLikeCount
+    FROM communityReplyLike
+    WHERE replyNum = #{replyNum}
+    GROUP BY replyNum
+  </select>
+  
+  <!-- 사용자가 댓글에 대해 좋아요/싫어요를 눌렀는지 조회 -->
+  <select id="userReplyLiked" parameterType="map" resultType="int">
+    SELECT replyLike
+    FROM communityReplyLike
+    WHERE replyNum = #{replyNum} AND studentId = #{studentId}
+  </select>
+  
+  <!-- 댓글 숨김 -->
+  <update id="updateReplyShowHide" parameterType="map">
+    UPDATE communityReply
+    SET showReply = #{showReply}
+    WHERE replyNum = #{replyNum}
+  </update>
 
 </mapper>

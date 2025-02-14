@@ -1,5 +1,7 @@
 package com.sp.app.model;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -17,6 +19,7 @@ public class PhotoGallery {
     private String modify_date; // 수정날짜
     private int showphotoGallery; // 글 숨김 여부 (1: 안 숨김, 0: 숨김)
 
+    private MultipartFile selectFile;
     
     private long schoolId; // schoolMember 테이블 기본키
 }

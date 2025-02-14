@@ -1,5 +1,9 @@
 package com.sp.app.model;
 
+import java.util.List;
+
+import org.springframework.web.multipart.MultipartFile;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -21,5 +25,7 @@ public class EnterGuide {
     
     private long schoolId; // schoolMember 테이블 기본키
     private long categoryId;
+    
+    private List<MultipartFile> selectFile;
 }
 

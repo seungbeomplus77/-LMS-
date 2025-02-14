@@ -17,14 +17,11 @@ public interface StudentScheduleMapper {
     public void updateStudentSchedule(StudentSchedule dto) throws SQLException;
     
     // 학생 일정 삭제 (PK 기준)
-    public void deleteStudentSchedule(long studentScheduleNum) throws SQLException;
+    public void deleteStudentSchedule(Map<String, Object> map) throws SQLException;
     
     // 학생 일정 단건 조회 (PK 기준)
     public StudentSchedule findStudentScheduleById(long studentScheduleNum) throws SQLException;
     
     // 조건에 따른 학생 일정 목록 조회 (예: 특정 학생 일정, 페이징 등)
     public List<StudentSchedule> listStudentSchedule(Map<String, Object> map) throws SQLException;
-    
-    // 데이터 건수 조회 (페이징 등에서 활용)
-    public int dataCount(Map<String, Object> map) throws SQLException;
 }

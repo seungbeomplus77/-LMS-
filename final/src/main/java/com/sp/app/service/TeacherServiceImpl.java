@@ -3,38 +3,74 @@ package com.sp.app.service;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.stereotype.Service;
+
+import com.sp.app.mapper.TeacherMapper;
 import com.sp.app.model.Teacher;
 
-public class TeacherServiceImpl implements TeacherService {
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class TeacherServiceImpl implements TeacherService {
+	private final TeacherMapper mapper;
+	
 	@Override
 	public void insertTeacher(Teacher dto) throws Exception {
-		// TODO Auto-generated method stub
+		try {
+			mapper.insertTeacher(dto);
+		} catch (Exception e) {
+			log.info("insertTeacher : ", e);
+			throw e;
+		}
 		
 	}
 
 	@Override
 	public void updateTeacher(Teacher dto) throws Exception {
-		// TODO Auto-generated method stub
-		
+		try {
+			mapper.updateTeacher(dto);
+		} catch (Exception e) {
+			log.info("updateTeacher : ", e);
+			throw e;
+		}
 	}
+	
 
 	@Override
 	public void deleteTeacher(long schoolId) throws Exception {
-		// TODO Auto-generated method stub
-		
+		try {
+			mapper.deleteTeacher(schoolId);
+		} catch (Exception e) {
+			log.info("deleteTeacher : ", e);
+			throw e;
+		}
 	}
-
 	@Override
 	public Teacher findTeacherById(long schoolId) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
+		Teacher dto = null;
+		
+		try {
+			dto = mapper.findTeacherById(schoolId);
+		} catch (Exception e) {
+			log.info("findTeacherById : ", e);
+		}
+		return dto;
 	}
 
 	@Override
 	public List<Teacher> listTeacher(Map<String, Object> map) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
+		List<Teacher> list = null;
+		
+		try {
+			mapper.listTeacher(map);
+		} catch (Exception e) {
+			log.info("listTeacher : ", e);
+			throw e;
+		}
+		return list;
 	}
 
 }

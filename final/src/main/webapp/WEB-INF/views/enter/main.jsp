@@ -64,23 +64,25 @@
   </thead>
   
   <tbody>
+    <c:forEach var="dto" items="${enterGuideList}">
     <tr>
     	<td>
-    		1
+    		${dto.enterGuideNum}
     	</td>
     	<td>
-    		특별전형
+    		${dto.categoryId}
     	</td>
     	<td>
-    		<a class="" href="#">2025년도 입학 안내</a>
+    		<a class="" href="#">${dto.subject}</a>
     	</td>
     	<td>
-    		2025-10-10
+    		${dto.content}
     	</td>
     	<td>
     		O
     	</td>
     </tr>
+    </c:forEach>
   </tbody>
 </table>
 	  <div class="page-navigation">

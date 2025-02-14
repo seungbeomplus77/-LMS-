@@ -2,6 +2,7 @@ package com.sp.app.mapper;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
 
@@ -22,5 +23,5 @@ public interface HakBanMapper {
     public HakBan findHakBanById(long hakBanNum) throws SQLException;
     
     // 목록 조회
-    public List<HakBan> listHakBan() throws SQLException;
+    public List<HakBan> listHakBan(Map<String, Object> map) throws SQLException;
 }

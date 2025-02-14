@@ -11,7 +11,6 @@ import lombok.Setter;
 @NoArgsConstructor
 public class CommunityReply {
     private long replyNum;
-    private long communityNum;
     private long parent; // 기존 parentNum을 parent로 변경 (부모 댓글의 ID)
     
     private long studentId; // schoolmember의 기본키
@@ -32,6 +31,6 @@ public class CommunityReply {
     // 추가된 컬럼들 (계층 구조 및 정렬을 위한 필드)
     private int depth;     // 댓글의 깊이 (최상위 댓글: 0, 답글: 1, ...)
     private int orderNo;   // 같은 그룹 내에서 댓글의 정렬 순서
-    private int groupNum;  // 댓글 그룹 번호 (연관된 댓글들을 묶는 번호)
-    private int gap;       // 댓글 간 간격 혹은 정렬을 위한 추가 정보
+    private long groupNum;  // 댓글 그룹 번호 (연관된 댓글들을 묶는 번호)
+    private long gap;       // 댓글 간 간격 혹은 정렬을 위한 추가 정보
 }

@@ -26,7 +26,7 @@ public interface EnterGuideMapper {
     public List<EnterGuide> listEnterGuide(Map<String, Object> map) throws SQLException;
     
     // (옵션) 데이터 개수 조회 - 페이징 등에서 활용 가능
-    public int dataCount(Map<String, Object> map) throws SQLException;
+    public int enterGuideDataCount(Map<String, Object> map) throws SQLException;
     
 	public void updateHitCount(long enterGuideNum) throws SQLException;
 	public EnterGuide findByPrev(Map<String, Object> map);

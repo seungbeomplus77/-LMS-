@@ -21,32 +21,74 @@ import lombok.extern.slf4j.Slf4j;
 public class EnterGuideServiceImpl implements EnterGuideService {
 	private final EnterGuideMapper mapper;
 	private final StorageService storageService;
-	
-	@Override
-	public void insertEnterGuide(EnterGuide dto) throws Exception {
-		try {
-			mapper.insertEnterGuide(dto);
-		} catch (Exception e) {
-			log.info("insertEnterGuide : ", e);
-			throw e;
-		}
-		
-	}
 
 	@Override
-	public void updateEnterGuide(EnterGuide dto) throws Exception {
-		try {
-			mapper.updateEnterGuide(dto);
-		} catch (Exception e) {
-			log.info("updateEnterGuide : ", e);
-			throw e;
-		}
-		
+	public void insertEnterGuide(EnterGuide dto, String uploadPath) throws Exception {
+	    try {
+	        boolean realFile = dto.getSelectFile() != null &&
+	            dto.getSelectFile().stream().anyMatch(mf -> !mf.isEmpty());
+	        if (realFile) {
+	            insertEnterGuideFile(dto, uploadPath);
+	        } else {
+	            mapper.insertEnterGuide(dto);
+	        }
+	    } catch (Exception e) {
+	        log.info("insertEnterGuide : ", e);
+	        throw e;
+	    }
 	}
 
+
 	@Override
-	public void deleteEnterGuide(long enterGuideNum) throws Exception {
+	public void updateEnterGuide(EnterGuide dto, String uploadPath) throws Exception {
+	    try {
+	        // dto.getSelectFile()가 null이 아니고, 실제 새 파일이 존재하는지 확인
+	        if (dto.getSelectFile() != null && !dto.getSelectFile().isEmpty()) {
+	            boolean newFile = false;
+	            for (MultipartFile mf : dto.getSelectFile()) {
+	                if (!mf.isEmpty()) {
+	                	newFile = true;
+	                    break;
+	                }
+	            }
+	            if (newFile) {
+	                // 기존 파일이 있다면 삭제
+	                if (dto.getSaveFilename() != null && !dto.getSaveFilename().isBlank()) {
+	                    deleteUploadFile(uploadPath, dto.getSaveFilename());
+	                }
+	                // 새 파일 업로드 (업데이트에서는 보통 하나의 파일만 업로드)
+	                for (MultipartFile mf : dto.getSelectFile()) {
+	                    if (mf.isEmpty()) continue;
+	                    try {
+	                        String saveFilename = Objects.requireNonNull(storageService.uploadFileToServer(mf, uploadPath));
+	                        String originalFilename = mf.getOriginalFilename();
+	                        dto.setSaveFilename(saveFilename);
+	                        dto.setOriginalFilename(originalFilename);
+	                        break;  // 하나의 파일만 처리
+	                    } catch (Exception e) {
+	                        log.info("updateEnterGuide file upload error: ", e);
+	                        throw e;
+	                    }
+	                }
+	            }
+	        }
+	        // DB 업데이트 실행
+	        mapper.updateEnterGuide(dto);
+	    } catch (Exception e) {
+	        log.info("updateEnterGuide : ", e);
+	        throw e;
+	    }
+	}
+
+
+	@Override
+	public void deleteEnterGuide(long enterGuideNum, String uploadPath) throws Exception {
 		try {
+			EnterGuide dto = findEnterGuideById(enterGuideNum);
+			
+			
+			deleteUploadFile(uploadPath, dto.getSaveFilename());
+			
 			mapper.deleteEnterGuide(enterGuideNum);
 		} catch (Exception e) {
 			log.info("deleteEnterGuide : ", e);
@@ -85,7 +127,7 @@ public class EnterGuideServiceImpl implements EnterGuideService {
 		int result = 0;
 		
 		try {
-			result = mapper.dataCount(map);
+			result = mapper.enterGuideDataCount(map);
 		} catch (Exception e) {
 			log.info("enterGuideDataCount : ", e);
 		}
@@ -126,26 +168,38 @@ public class EnterGuideServiceImpl implements EnterGuideService {
 		return dto;
 	}
 	
+	@Override
+	public boolean deleteUploadFile(String uploadPath, String filename) {
+		return storageService.deleteFile(uploadPath, filename);
+	}
+	
 	// 파일 업로드
 	protected void insertEnterGuideFile(EnterGuide dto, String uploadPath) throws Exception {
-		for (MultipartFile mf : dto.getSelectFile()) {
-			try {
-				String saveFilename = Objects.requireNonNull(storageService.uploadFileToServer(mf, uploadPath));
-				String originalFilename = mf.getOriginalFilename();
+	    // dto.getSelectFile()이 null이 아니고, 실제 업로드할 파일이 있는지 체크
+	    if (dto.getSelectFile() != null) {
+	        for (MultipartFile mf : dto.getSelectFile()) {
+	            // 파일이 비어있다면 건너뜀
+	            if (mf.isEmpty()) {
+	                continue;
+	            }
+	            try {
+	                String saveFilename = Objects.requireNonNull(storageService.uploadFileToServer(mf, uploadPath));
+	                String originalFilename = mf.getOriginalFilename();
 
-				dto.setOriginalFilename(originalFilename);
-				dto.setSaveFilename(saveFilename);
-
-				mapper.insertEnterGuide(dto);
-			} catch (NullPointerException e) {
-				log.info("insertLectureFile : ", e);
-			} catch (StorageException e) {
-				log.info("insertLectureFile : ", e);
-			} catch (Exception e) {
-				log.info("insertLectureFile : ", e);
-				throw e;
-			}
-		}
-	}		
+	                dto.setOriginalFilename(originalFilename);
+	                dto.setSaveFilename(saveFilename);
+	                
+	                mapper.insertEnterGuide(dto);
+	            } catch (NullPointerException e) {
+	                log.info("insertEnterGuideFile : ", e);
+	            } catch (StorageException e) {
+	                log.info("insertEnterGuideFile : ", e);
+	            } catch (Exception e) {
+	                log.info("insertEnterGuideFile : ", e);
+	                throw e;
+	            }
+	        }
+	    }
+	}
 
 }

@@ -79,11 +79,11 @@ public class EnterController {
 			map.put("offset", offset);
 			map.put("size", size);
 			
-			List<EnterGuide> enterGuideList = service.listEnterGuide(map);
+			List<EnterGuide> listEnterGuide = service.listEnterGuide(map);
 			
 			String cp = req.getContextPath();
 			String query = "";
-			String listUrl = cp + "/enter/list";
+			String listUrl = cp + "/enter/main";
 			String articleUrl = cp + "/enter/article";
 			
 			if(! kwd.isBlank()) {
@@ -96,7 +96,7 @@ public class EnterController {
 			String paging = paginateUtil.paging(current_page, 
 					total_page, listUrl);
 			
-			model.addAttribute("enterGuideList", enterGuideList);
+			model.addAttribute("listEnterGuide", listEnterGuide);
 			model.addAttribute("list", list);
 			model.addAttribute("dataCount", dataCount);
 			model.addAttribute("size", size);

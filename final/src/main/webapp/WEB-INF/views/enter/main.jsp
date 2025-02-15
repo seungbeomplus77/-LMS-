@@ -64,7 +64,7 @@
   </thead>
   
   <tbody>
-    <c:forEach var="dto" items="${enterGuideList}">
+    <c:forEach var="dto" items="${listEnterGuide}">
     <tr>
     	<td>
     		${dto.enterGuideNum}
@@ -77,6 +77,7 @@
     	</td>
     	<td>
     		${dto.content}
+    		${dto.categoryName}
     	</td>
     	<td>
     		O
@@ -86,7 +87,7 @@
   </tbody>
 </table>
 	  <div class="page-navigation">
-	  ${dataCount == 0 ? "페이칭 처리 테스트." : paging}
+	  ${dataCount == 0 ? "등록된 게시물이 없습니다." : paging}
 	  </div>
     </div>
   </div>

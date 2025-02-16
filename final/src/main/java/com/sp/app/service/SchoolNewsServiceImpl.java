@@ -84,7 +84,7 @@ public class SchoolNewsServiceImpl implements SchoolNewsService {
 		int result = 0;
 		
 		try {
-			result = mapper.dataCount(map);
+			result = mapper.schoolNewsDataCount(map);
 		} catch (Exception e) {
 			log.info("schoolNewsDataCount : ", e);
 		}

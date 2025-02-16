@@ -44,9 +44,9 @@ public class EnterManagerController {
 	
 	@PostConstruct // 생성자 호출 후 한번 실행
 	public void init() {
-		// 파일을 저장할 실제 경로
-		uploadPath = storageService.getRealPath("/uploads/file");
-	}	
+	    // 파일을 저장할 실제 절대 경로를 직접 지정
+	    uploadPath = "c:/uploads/file";
+	}
 	
 	@GetMapping("main")
 	public String main(
@@ -266,26 +266,26 @@ public class EnterManagerController {
 
 	@GetMapping("download")
 	public ResponseEntity<?> download(
-			@RequestParam(name = "enterGuideNum") long enterGuideNum,
-			HttpServletRequest req) throws Exception {
-	
-		try {
-			EnterGuide dto = Objects.requireNonNull(service.findEnterGuideById(enterGuideNum));
-			return storageService.downloadFile(uploadPath, dto.getSaveFilename(), dto.getOriginalFilename());
-		
-		
-		} catch (NullPointerException e) {
-		} catch (Exception e) {
-			log.info("download : ", e);
-		}
-		
-		String url = req.getContextPath() + "admin/downloadFailed";
-		
-		return ResponseEntity
-				.status(HttpStatus.FOUND) // 302 상태 코드(리다이렉트)
-				.location(URI.create(url)) // 리다이렉트할 주소 설정
-				.build();
+	        @RequestParam(name = "enterGuideNum") long enterGuideNum,
+	        HttpServletRequest req) throws Exception {
+
+	    try {
+	        EnterGuide dto = Objects.requireNonNull(service.findEnterGuideById(enterGuideNum));
+	        // uploadPath가 이미 절대 경로이므로 그대로 사용합니다.
+	        return storageService.downloadFile(uploadPath, dto.getSaveFilename(), dto.getOriginalFilename());
+	    } catch (NullPointerException e) {
+	    } catch (Exception e) {
+	        log.info("download : ", e);
+	    }
+	    
+	    String url = req.getContextPath() + "admin/downloadFailed";
+	    
+	    return ResponseEntity
+	            .status(HttpStatus.FOUND)
+	            .location(URI.create(url))
+	            .build();
 	}
+
 	
 	@GetMapping("downloadFailed")
 	public String downloadFailed() {

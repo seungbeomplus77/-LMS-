@@ -15,7 +15,7 @@ public class SchoolNews {
     private long schoolNewsNum;
     private String subject; // 제목
     private String content; // 내용
-    private Integer hitCount; // 조회수
+    private int hitCount; // 조회수
     private String saveFilename; // 저장파일이름
     private String originalFilename; // 원본파일이름
     private String reg_date; // 등록날짜

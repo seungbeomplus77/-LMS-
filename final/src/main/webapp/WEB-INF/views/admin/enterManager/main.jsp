@@ -76,8 +76,6 @@
   </div>
 </div>
 
-
-
 <div class="body-main">
 <table class="table">
   <thead>

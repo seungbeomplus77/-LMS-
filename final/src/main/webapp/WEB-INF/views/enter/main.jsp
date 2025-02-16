@@ -29,14 +29,25 @@
   <h3 class="me-5"><i class="bi bi-mortarboard"></i> 한눈에 보는 입학안내</h3>
 </div>
 
-<!-- 검색 창  -->
-<div class="row d-flex justify-content-center">
-  <div class="col-6 text-center">
-<form class="d-flex" role="enterSearchForm">
-  <input class="form-control me-2" type="search" placeholder="검색할 키워드를 입력하세요" aria-label="Search">
-  <button type="button" class="btn btn-light" onclick="searchList()"> <i class="bi bi-search"></i> </button>
-</form>
-  </div>
+<div class="col-6 text-center">
+    <form class="row" name="searchForm" onsubmit="return false;">
+        <div class="col-auto p-1">
+            <select name="schType" class="form-select">
+                <option value="all" ${schType=="all"?"selected":""}>제목+내용</option>
+                <option value="reg_date" ${schType=="reg_date"?"selected":""}>등록일</option>
+                <option value="subject" ${schType=="subject"?"selected":""}>제목</option>
+                <option value="content" ${schType=="content"?"selected":""}>내용</option>
+            </select>
+        </div>
+        <div class="col-auto p-1">
+            <input type="text" name="kwd" value="${kwd}" class="form-control" placeholder="검색어 입력">
+        </div>
+        <div class="col-auto p-1">
+            <button type="button" class="btn btn-light" onclick="searchList()"> 
+                <i class="bi bi-search"></i>
+            </button>
+        </div>
+    </form>
 </div>
 
 <div class="enter-border" style="width: 55%; margin: 0 auto; margin-top:20px; border-top: 3px solid #424951;"></div>
@@ -44,10 +55,24 @@
 <!-- 카테고리 버튼 -->
 <div class="category-buttons mb-3 mt-4">
   <div class="btn-group d-flex" role="group" aria-label="입학안내 카테고리">
-<button type="button" class="btn btn-outline-secondary flex-fill rounded-0 fw-bold">전체</button>
-<button type="button" class="btn btn-outline-secondary flex-fill rounded-0 fw-bold">신입학</button>
-<button type="button" class="btn btn-outline-secondary flex-fill rounded-0 fw-bold">전편입</button>
-<button type="button" class="btn btn-outline-secondary flex-fill rounded-0 fw-bold">특별전형</button>
+    <c:url var="urlAll" value="/enter/main">
+      <c:param name="categoryId" value="1" />
+    </c:url>
+    <c:url var="urlNew" value="/enter/main">
+      <c:param name="categoryId" value="2" />
+    </c:url>
+    <c:url var="urlTransfer" value="/enter/main">
+      <c:param name="categoryId" value="3" />
+    </c:url>
+    <c:url var="urlSpecial" value="/enter/main">
+      <c:param name="categoryId" value="4" />
+    </c:url>
+    
+    <a href="${pageContext.request.contextPath}${urlAll}" class="btn btn-outline-secondary flex-fill rounded-0 fw-bold">전체</a>
+    <a href="${pageContext.request.contextPath}${urlNew}" class="btn btn-outline-secondary flex-fill rounded-0 fw-bold">신입학</a>
+    <a href="${pageContext.request.contextPath}${urlTransfer}" class="btn btn-outline-secondary flex-fill rounded-0 fw-bold">전편입</a>
+   	<a href="${pageContext.request.contextPath}/enter/main?categoryId=4" class="btn btn-outline-secondary flex-fill rounded-0 fw-bold">특별전형</a>
+
   </div>
 </div>
 
@@ -64,7 +89,7 @@
   </thead>
   
   <tbody>
-    <c:forEach var="dto" items="${listEnterGuide}">
+    <c:forEach var="dto" items="${listEnterGuide}" varStatus="status">
     <tr>
     	<td>
     		${dto.enterGuideNum}
@@ -73,7 +98,9 @@
     		${dto.categoryId}
     	</td>
     	<td>
-    		<a class="" href="#">${dto.subject}</a>
+			<a href="${pageContext.request.contextPath}/enter/article/${dto.enterGuideNum}?page=${page}${not empty query ? '&' : ''}${query}" class="text-reset">
+			    ${dto.subject}
+			</a>
     	</td>
     	<td>
     		${dto.content}
@@ -87,12 +114,45 @@
   </tbody>
 </table>
 	  <div class="page-navigation">
-	  ${dataCount == 0 ? "등록된 게시물이 없습니다." : paging}
+	  ${dataCount == 0 ? "페이칭 처리 테스트." : paging}
 	  </div>
     </div>
   </div>
 </div>
 </main>
+<script type="text/javascript">
+  // 페이지 로드 후, 엔터키 입력 시 searchList() 실행
+  window.addEventListener('load', () => {
+    const inputEL = document.querySelector('form[name="searchForm"] input[name="kwd"]');
+    if(inputEL) {
+      inputEL.addEventListener('keydown', function(evt) {
+        if(evt.key === 'Enter') {
+          evt.preventDefault();
+          searchList();
+        }
+      });
+    }
+  });
+
+  function searchList() {
+    const f = document.searchForm; // 폼의 name="searchForm"
+    
+    // 검색어가 없으면 실행하지 않음
+    if (!f.kwd.value.trim()) {
+      alert("검색어를 입력하세요.");
+      f.kwd.focus();
+      return;
+    }
+    
+    // 폼 데이터를 FormData로 가져와 URLSearchParams로 변환
+    const formData = new FormData(f);
+    const requestParams = new URLSearchParams(formData).toString();
+    
+    // 관리 영역의 메인 페이지 URL (컨텍스트 경로 포함)
+    const url = '${pageContext.request.contextPath}/enter/main';
+    location.href = url + '?' + requestParams;
+  }
+</script>
 <footer class="fixed-bottom w-100 bg-light bg-gradient fw-lighter text-dark font-size small">
     <jsp:include page="/WEB-INF/views/layout/footer.jsp"/>
 </footer>

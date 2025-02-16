@@ -8,7 +8,7 @@
     INSERT INTO schoolNotice 
       (schoolNoticeNum, subject, content, hitCount, saveFilename, originalFilename, reg_date, modify_date, showSchoolNotice, schoolId, categoryId)
     VALUES 
-      (schoolNotice_seq.nextval, #{subject}, #{content}, #{hitCount}, #{saveFilename}, #{originalFilename}, SYSDATE, SYSDATE, #{showSchoolNotice}, #{schoolId}, #{categoryId})
+      (schoolNotice_seq.nextval, #{subject}, #{content}, 0, #{saveFilename, jdbcType=VARCHAR}, #{originalFilename, jdbcType=VARCHAR}, SYSDATE, SYSDATE, #{showSchoolNotice}, #{schoolId}, #{categoryId})
   </insert>
   
   <!-- 공지사항 글 수정 -->
@@ -43,12 +43,8 @@
            TO_CHAR(sn.modify_date, 'YYYY-MM-DD') AS modify_date,
            sn.showSchoolNotice,
            sn.schoolId,
-           sn.categoryId,
-           sc.categoryName,
-           sc.showCategory
+           sn.categoryId
     FROM schoolNotice sn
-    LEFT JOIN schoolNoticeCategory sc
-      ON sn.categoryId = sc.categoryId
     WHERE sn.schoolNoticeNum = #{schoolNoticeNum}
   </select>
   
@@ -56,7 +52,7 @@
   <select id="listSchoolNotice" parameterType="map" resultType="com.sp.app.model.SchoolNotice">
     SELECT sn.schoolNoticeNum,
            sn.subject,
-           sn.content,
+           sn.content AS content,
            sn.hitCount,
            sn.saveFilename,
            sn.originalFilename,
@@ -65,40 +61,34 @@
            sn.showSchoolNotice,
            sn.schoolId,
            sn.categoryId,
-           sc.categoryName,
-           sc.showCategory
+           sc.categoryName
     FROM schoolNotice sn
-    LEFT JOIN schoolNoticeCategory sc
-      ON sn.categoryId = sc.categoryId
+    LEFT JOIN schoolNoticeCategory sc ON sn.categoryId = sc.categoryId
     <where>
-      <if test="schoolId != null">
-        AND sn.schoolId = #{schoolId}
-      </if>
-      <if test="categoryId != null">
+      <if test="categoryId != null and categoryId != 1">
         AND sn.categoryId = #{categoryId}
-      </if>
-      <if test="keyword != null and keyword != ''">
-        AND sn.subject LIKE '%' || #{keyword} || '%'
+      </if>  
+      <if test="kwd != null and kwd != ''">
+        AND (sn.subject LIKE '%' || #{kwd} || '%' OR sn.content LIKE '%' || #{kwd} || '%')
       </if>
     </where>
     ORDER BY sn.schoolNoticeNum DESC
+    OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
   </select>
   
   <!-- 데이터 건수 조회 (페이징 등) -->
   <select id="dataCount" parameterType="map" resultType="int">
-    SELECT COUNT(*)
+    SELECT NVL(COUNT(*), 0)
     FROM schoolNotice sn
+    JOIN schoolMember sm ON sm.schoolId = sn.schoolId
     <where>
-      <if test="schoolId != null">
-        AND sn.schoolId = #{schoolId}
-      </if>
-      <if test="categoryId != null">
+      <if test="categoryId != null and categoryId != 1">
         AND sn.categoryId = #{categoryId}
+      </if>			
+      <if test="kwd != null and kwd != ''">
+        AND ( <include refid="where-list"/> )
       </if>
-      <if test="keyword != null and keyword != ''">
-        AND sn.subject LIKE '%' || #{keyword} || '%'
-      </if>
-    </where>
+    </where>   
   </select>
   
   <!-- 조회수 업데이트 -->
@@ -112,28 +102,17 @@
   <select id="findByPrev" parameterType="map" resultType="com.sp.app.model.SchoolNotice">
     SELECT *
     FROM (
-      SELECT sn.schoolNoticeNum,
-             sn.subject,
-             sn.content,
-             sn.hitCount,
-             sn.saveFilename,
-             sn.originalFilename,
+      SELECT sn.schoolNoticeNum, sn.subject, sn.content, sn.hitCount, sn.saveFilename, sn.originalFilename,
              TO_CHAR(sn.reg_date, 'YYYY-MM-DD') AS reg_date,
              TO_CHAR(sn.modify_date, 'YYYY-MM-DD') AS modify_date,
-             sn.showSchoolNotice,
-             sn.schoolId,
-             sn.categoryId,
-             sc.categoryName,
-             sc.showCategory
+             sn.showSchoolNotice, sn.schoolId, sn.categoryId
       FROM schoolNotice sn
-      LEFT JOIN schoolNoticeCategory sc
-        ON sn.categoryId = sc.categoryId
       <where>
          <if test="schoolNoticeNum != null">
            AND sn.schoolNoticeNum &lt; #{schoolNoticeNum}
          </if>
-         <if test="keyword != null and keyword != ''">
-           AND sn.subject LIKE '%' || #{keyword} || '%'
+         <if test="kwd != null and kwd != ''">
+           AND (sn.subject LIKE '%' || #{kwd} || '%' OR sn.content LIKE '%' || #{kwd} || '%')
          </if>
       </where>
       ORDER BY sn.schoolNoticeNum DESC
@@ -145,33 +124,42 @@
   <select id="findByNext" parameterType="map" resultType="com.sp.app.model.SchoolNotice">
     SELECT *
     FROM (
-      SELECT sn.schoolNoticeNum,
-             sn.subject,
-             sn.content,
-             sn.hitCount,
-             sn.saveFilename,
-             sn.originalFilename,
+      SELECT sn.schoolNoticeNum, sn.subject, sn.content, sn.hitCount, sn.saveFilename, sn.originalFilename,
              TO_CHAR(sn.reg_date, 'YYYY-MM-DD') AS reg_date,
              TO_CHAR(sn.modify_date, 'YYYY-MM-DD') AS modify_date,
-             sn.showSchoolNotice,
-             sn.schoolId,
-             sn.categoryId,
-             sc.categoryName,
-             sc.showCategory
+             sn.showSchoolNotice, sn.schoolId, sn.categoryId
       FROM schoolNotice sn
-      LEFT JOIN schoolNoticeCategory sc
-        ON sn.categoryId = sc.categoryId
       <where>
          <if test="schoolNoticeNum != null">
            AND sn.schoolNoticeNum &gt; #{schoolNoticeNum}
          </if>
-         <if test="keyword != null and keyword != ''">
-           AND sn.subject LIKE '%' || #{keyword} || '%'
+         <if test="kwd != null and kwd != ''">
+           AND (sn.subject LIKE '%' || #{kwd} || '%' OR sn.content LIKE '%' || #{kwd} || '%')
          </if>
       </where>
       ORDER BY sn.schoolNoticeNum ASC
     )
     WHERE ROWNUM = 1
   </select>
+  
+  <!-- 검색 조건용 SQL -->
+  <sql id="where-list">
+    <choose>
+      <when test="schType == 'all' ">
+         ( INSTR(subject, #{kwd}) &gt; 0
+           OR INSTR(content, #{kwd}) &gt; 0 )
+      </when>
+      <when test="schType == 'reg_date' ">
+         ( TO_CHAR(reg_date, 'YYYYMMDD') = #{kwd}
+           OR TO_CHAR(reg_date, 'YYYY-MM-DD') = #{kwd} )
+      </when>
+      <when test="schType == 'content'">
+          INSTR(content, #{kwd}) &gt; 0
+      </when>
+      <otherwise>
+          INSTR(${schType}, #{kwd}) &gt; 0
+      </otherwise>
+    </choose>
+  </sql>
   
 </mapper>

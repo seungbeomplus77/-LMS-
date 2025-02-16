@@ -26,7 +26,7 @@ public interface SchoolNewsMapper {
     public List<SchoolNews> listSchoolNews(Map<String, Object> map) throws SQLException;
     
     // (옵션) 데이터 개수 조회 - 페이징 등에서 활용 가능
-    public int dataCount(Map<String, Object> map) throws SQLException;
+    public int schoolNewsDataCount(Map<String, Object> map) throws SQLException;
     
 	public void updateHitCount(long SchoolNewsNum) throws SQLException;
 	public SchoolNews findByPrev(Map<String, Object> map);

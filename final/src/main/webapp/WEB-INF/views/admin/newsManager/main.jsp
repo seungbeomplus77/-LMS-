@@ -30,14 +30,25 @@
   <h3 class="me-5"><i class="bi bi-newspaper"></i> 미래소식</h3>
 </div>
 
-<!-- 검색 창  -->
-<div class="row d-flex justify-content-center">
-  <div class="col-6 text-center">
-<form class="d-flex" role="enterSearchForm">
-  <input class="form-control me-2" type="search" placeholder="검색할 키워드를 입력하세요" aria-label="Search">
-  <button type="button" class="btn btn-light" onclick="searchList()"> <i class="bi bi-search"></i> </button>
-</form>
-  </div>
+<div class="col-6 text-center">
+    <form class="row" name="searchForm" onsubmit="return false;">
+        <div class="col-auto p-1">
+            <select name="schType" class="form-select">
+                <option value="all" ${schType=="all"?"selected":""}>제목+내용</option>
+                <option value="reg_date" ${schType=="reg_date"?"selected":""}>등록일</option>
+                <option value="subject" ${schType=="subject"?"selected":""}>제목</option>
+                <option value="content" ${schType=="content"?"selected":""}>내용</option>
+            </select>
+        </div>
+        <div class="col-auto p-1">
+            <input type="text" name="kwd" value="${kwd}" class="form-control" placeholder="검색어 입력">
+        </div>
+        <div class="col-auto p-1">
+            <button type="button" class="btn btn-light" onclick="searchList()"> 
+                <i class="bi bi-search"></i>
+            </button>
+        </div>
+    </form>
 </div>
 
 <div class="enter-border" style="width: 55%; margin: 0 auto; margin-top:20px; border-top: 3px solid #424951;"></div>
@@ -47,6 +58,7 @@
   <thead>
     <tr>
       <th width="60">번호</th>
+      <th width="100">구분</th>
       <th>제목</th>
       <th width="100">작성일</th>
       <th width="50">파일</th>
@@ -54,34 +66,71 @@
   </thead>
   
   <tbody>
+    <c:forEach var="dto" items="${listSchoolNews}" varStatus="status">
     <tr>
     	<td>
-    		1
+    		${dto.schoolNewsNum}
     	</td>
     	<td>
-    		<a class="" href="#">미래를 밝힌 50인</a>
+			<a href="${pageContext.request.contextPath}/admin/newsManager/article/${dto.schoolNewsNum}?page=${page}${not empty query ? '&' : ''}${query}" class="text-reset">
+			    ${dto.subject}
+			</a>
     	</td>
     	<td>
-    		2025-10-10
+    		${dto.content}
     	</td>
     	<td>
-    		X
+    		O
     	</td>
     </tr>
+    </c:forEach>
   </tbody>
 </table>
-	 
 	  <div class="page-navigation">
 	  ${dataCount == 0 ? "페이칭 처리 테스트." : paging}
 	  </div>
-</div>
+    </div>
+
 <div class="col text-end">
-  <button type="button" class="btn btn-primary" onclick="location.href='${pageContext.request.contextPath}/student/studentqa/write';">게시글 등록</button>
-</div>	  
+  <button type="button" class="btn btn-primary" onclick="location.href='${pageContext.request.contextPath}/admin/newsManager/write';">게시글 등록</button>
+</div>  
   
   </div>
 </div>
 </main>
+<script type="text/javascript">
+  // 페이지 로드 후, 엔터키 입력 시 searchList() 실행
+  window.addEventListener('load', () => {
+    const inputEL = document.querySelector('form[name="searchForm"] input[name="kwd"]');
+    if(inputEL) {
+      inputEL.addEventListener('keydown', function(evt) {
+        if(evt.key === 'Enter') {
+          evt.preventDefault();
+          searchList();
+        }
+      });
+    }
+  });
+
+  function searchList() {
+    const f = document.searchForm; // 폼의 name="searchForm"
+    
+    // 검색어가 없으면 실행하지 않음
+    if (!f.kwd.value.trim()) {
+      alert("검색어를 입력하세요.");
+      f.kwd.focus();
+      return;
+    }
+    
+    // 폼 데이터를 FormData로 가져와 URLSearchParams로 변환
+    const formData = new FormData(f);
+    const requestParams = new URLSearchParams(formData).toString();
+    
+    // 관리 영역의 메인 페이지 URL (컨텍스트 경로 포함)
+    const url = '${pageContext.request.contextPath}/admin/newsManager/main';
+    location.href = url + '?' + requestParams;
+  }
+</script>
 <footer class="fixed-bottom w-100 bg-light.bg-gradient fw-lighter text-dark font-size small">
     <jsp:include page="/WEB-INF/views/layout/footer.jsp"/>
 </footer>

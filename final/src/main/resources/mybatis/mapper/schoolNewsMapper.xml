@@ -7,7 +7,7 @@
     INSERT INTO schoolNews 
       (schoolNewsNum, subject, content, hitCount, saveFilename, originalFilename, reg_date, modify_date, showSchoolNews, schoolId)
     VALUES 
-      (schoolNews_seq.nextval, #{subject}, #{content}, #{hitCount}, #{saveFilename}, #{originalFilename}, SYSDATE, SYSDATE, #{showSchoolNews}, #{schoolId})
+      (schoolNews_seq.nextval, #{subject}, #{content}, 0, #{saveFilename}, #{originalFilename}, SYSDATE, SYSDATE, #{showSchoolNews}, #{schoolId})
   </insert>
   
   <!-- 학교소식 글 수정 -->
@@ -16,8 +16,8 @@
     SET subject = #{subject},
         content = #{content},
         hitCount = #{hitCount},
-        saveFilename = #{saveFilename},
-        originalFilename = #{originalFilename},
+        saveFilename = #{saveFilename, jdbcType=VARCHAR},
+        originalFilename = #{originalFilename, jdbcType=VARCHAR},
         modify_date = SYSDATE,
         showSchoolNews = #{showSchoolNews},
         schoolId = #{schoolId}
@@ -63,25 +63,23 @@
       <if test="schoolId != null">
         AND schoolId = #{schoolId}
       </if>
-      <if test="keyword != null and keyword != ''">
-        AND subject LIKE '%' || #{keyword} || '%'
+      <if test="kwd != null and kwd != ''">
+        AND subject LIKE '%' || #{kwd} || '%'
       </if>
     </where>
     ORDER BY schoolNewsNum DESC
   </select>
   
   <!-- 데이터 건수 조회 (페이징 등) -->
-  <select id="dataCount" parameterType="map" resultType="int">
-    SELECT COUNT(*)
-    FROM schoolNews
-    <where>
-      <if test="schoolId != null">
-        AND schoolId = #{schoolId}
-      </if>
-      <if test="keyword != null and keyword != ''">
-        AND subject LIKE '%' || #{keyword} || '%'
-      </if>
-    </where>
+  <select id="schoolNewsDataCount" parameterType="map" resultType="int">
+	  SELECT NVL(COUNT(*), 0)
+	  FROM schoolNews s
+	  JOIN schoolMember sm ON sm.schoolId = s.schoolId
+	  <where>	
+	    <if test="kwd != null and kwd != ''">
+	      AND ( <include refid="where-list"/> )
+	    </if>
+	  </where> 
   </select>
   
   <!-- 조회수 업데이트 -->
@@ -95,23 +93,17 @@
   <select id="findByPrev" parameterType="map" resultType="com.sp.app.model.SchoolNews">
     SELECT *
     FROM (
-      SELECT schoolNewsNum,
-             subject,
-             content,
-             hitCount,
-             saveFilename,
-             originalFilename,
+      SELECT schoolNewsNum, subject, content, hitCount, saveFilename, originalFilename,
              TO_CHAR(reg_date, 'YYYY-MM-DD') AS reg_date,
              TO_CHAR(modify_date, 'YYYY-MM-DD') AS modify_date,
-             showSchoolNews,
-             schoolId
+             showSchoolNews, schoolId
       FROM schoolNews
       <where>
          <if test="schoolNewsNum != null">
            AND schoolNewsNum &lt; #{schoolNewsNum}
          </if>
-         <if test="keyword != null and keyword != ''">
-           AND subject LIKE '%' || #{keyword} || '%'
+         <if test="kwd != null and kwd != ''">
+           AND (subject LIKE '%' || #{kwd} || '%' OR content LIKE '%' || #{kwd} || '%')
          </if>
       </where>
       ORDER BY schoolNewsNum DESC
@@ -123,27 +115,40 @@
   <select id="findByNext" parameterType="map" resultType="com.sp.app.model.SchoolNews">
     SELECT *
     FROM (
-      SELECT schoolNewsNum,
-             subject,
-             content,
-             hitCount,
-             saveFilename,
-             originalFilename,
+      SELECT SchoolNewsNum, subject, content, hitCount, saveFilename, originalFilename,
              TO_CHAR(reg_date, 'YYYY-MM-DD') AS reg_date,
              TO_CHAR(modify_date, 'YYYY-MM-DD') AS modify_date,
-             showSchoolNews,
-             schoolId
+             showSchoolNews, schoolId
       FROM schoolNews
       <where>
-         <if test="schoolNewsNum != null">
+         <if test="SchoolNewsNum != null">
            AND schoolNewsNum &gt; #{schoolNewsNum}
          </if>
-         <if test="keyword != null and keyword != ''">
-           AND subject LIKE '%' || #{keyword} || '%'
+         <if test="kwd != null and kwd != ''">
+           AND (subject LIKE '%' || #{kwd} || '%' OR content LIKE '%' || #{kwd} || '%')
          </if>
       </where>
       ORDER BY schoolNewsNum ASC
     )
     WHERE ROWNUM = 1
   </select>
+  
+  	<sql id="where-list">
+		<choose>
+			<when test="schType == 'all' ">
+			   ( INSTR(subject, #{kwd}) &gt; 0
+		          OR DBMS_LOB.INSTR(content, #{kwd}) &gt; 0 )
+			</when>
+			<when test="schType == 'reg_date' ">
+			   ( TO_CHAR(reg_date, 'YYYYMMDD') = #{kwd}
+		          OR TO_CHAR(reg_date, 'YYYY-MM-DD') = #{kwd} )
+			</when>
+			<when test="schType == 'content'">
+			    DBMS_LOB.INSTR(content, #{kwd}) &gt; 0
+			</when>
+			<otherwise>
+			    INSTR(${schType}, #{kwd}) &gt; 0
+			</otherwise>
+		</choose>
+	</sql>
 </mapper>

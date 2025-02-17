@@ -7,13 +7,13 @@ import com.sp.app.model.GradeGuide;
 
 public interface GradeGuideService {
     // 학점안내 글 등록
-    public void insertGradeGuide(GradeGuide dto) throws Exception;
+    public void insertGradeGuide(GradeGuide dto, String uploadPath) throws Exception;
     
     // 학점안내 글 수정
-    public void updateGradeGuide(GradeGuide dto) throws Exception;
+    public void updateGradeGuide(GradeGuide dto, String uploadPath) throws Exception;
     
     // 학점안내 글 삭제 (PK인 gradeGuideNum으로 삭제)
-    public void deleteGradeGuide(long gradeGuideNum) throws Exception;
+    public void deleteGradeGuide(long gradeGuideNum, String uploadPath) throws Exception;
     
     // PK(gradeGuideNum)로 단건 조회
     public GradeGuide findGradeGuideById(long gradeGuideNum) throws Exception;
@@ -27,4 +27,6 @@ public interface GradeGuideService {
 	public void updateHitCount(long gradeGuideNum) throws Exception;
 	public GradeGuide findByPrev(Map<String, Object> map);
 	public GradeGuide findByNext(Map<String, Object> map);	
+	
+	public boolean deleteUploadFile(String uploadPath, String filename);
 }

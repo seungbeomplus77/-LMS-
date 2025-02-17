@@ -23,29 +23,69 @@ public class GradeGuideServiceImpl implements GradeGuideService {
 	private final StorageService storageService;
 	
 	@Override
-	public void insertGradeGuide(GradeGuide dto) throws Exception {
-		try {
-			mapper.insertGradeGuide(dto);
-		} catch (Exception e) {
-			log.info("insertGradeGuide : ", e);
-			throw e;
-		}
-		
+	public void insertGradeGuide(GradeGuide dto, String uploadPath) throws Exception {
+	    try {
+	        boolean realFile = dto.getSelectFile() != null &&
+	            dto.getSelectFile().stream().anyMatch(mf -> !mf.isEmpty());
+	        if (realFile) {
+	        	insertGradeGuideFile(dto, uploadPath);
+	        } else {
+	            mapper.insertGradeGuide(dto);
+	        }
+	    } catch (Exception e) {
+	        log.info("insertGradeGuide : ", e);
+	        throw e;
+	    }
 	}
 
 	@Override
-	public void updateGradeGuide(GradeGuide dto) throws Exception {
-		try {
-			mapper.updateGradeGuide(dto);
-		} catch (Exception e) {
-			log.info("updateGradeGuide : ", e);
-			throw e;
-		}
+	public void updateGradeGuide(GradeGuide dto, String uploadPath) throws Exception {
+	    try {
+	        // dto.getSelectFile()가 null이 아니고, 실제 새 파일이 존재하는지 확인
+	        if (dto.getSelectFile() != null && !dto.getSelectFile().isEmpty()) {
+	            boolean newFile = false;
+	            for (MultipartFile mf : dto.getSelectFile()) {
+	                if (!mf.isEmpty()) {
+	                	newFile = true;
+	                    break;
+	                }
+	            }
+	            if (newFile) {
+	                // 기존 파일이 있다면 삭제
+	                if (dto.getSaveFilename() != null && !dto.getSaveFilename().isBlank()) {
+	                    deleteUploadFile(uploadPath, dto.getSaveFilename());
+	                }
+	                // 새 파일 업로드 (업데이트에서는 보통 하나의 파일만 업로드)
+	                for (MultipartFile mf : dto.getSelectFile()) {
+	                    if (mf.isEmpty()) continue;
+	                    try {
+	                        String saveFilename = Objects.requireNonNull(storageService.uploadFileToServer(mf, uploadPath));
+	                        String originalFilename = mf.getOriginalFilename();
+	                        dto.setSaveFilename(saveFilename);
+	                        dto.setOriginalFilename(originalFilename);
+	                        break;  // 하나의 파일만 처리
+	                    } catch (Exception e) {
+	                        log.info("updateGradeGuide file upload error: ", e);
+	                        throw e;
+	                    }
+	                }
+	            }
+	        }
+	        // DB 업데이트 실행
+	        mapper.updateGradeGuide(dto);
+	    } catch (Exception e) {
+	        log.info("updateGradeGuide : ", e);
+	        throw e;
+	    }
 	}
 
 	@Override
-	public void deleteGradeGuide(long gradeGuideNum) throws Exception {
+	public void deleteGradeGuide(long gradeGuideNum, String uploadPath) throws Exception {
 		try {
+			GradeGuide dto = findGradeGuideById(gradeGuideNum);
+			
+			deleteUploadFile(uploadPath, dto.getSaveFilename());
+			
 			mapper.deleteGradeGuide(gradeGuideNum);
 		} catch (Exception e) {
 			log.info("deleteGradeGuide : ", e);
@@ -58,7 +98,7 @@ public class GradeGuideServiceImpl implements GradeGuideService {
 		GradeGuide dto = null;
 		
 		try {
-			mapper.findGradeGuideById(gradeGuideNum);
+			dto = mapper.findGradeGuideById(gradeGuideNum);
 		} catch (Exception e) {
 			log.info("findGradeGuideById : ", e);
 		}
@@ -83,7 +123,7 @@ public class GradeGuideServiceImpl implements GradeGuideService {
 		int result = 0;
 		
 		try {
-			mapper.dataCount(map);
+			result = mapper.dataCount(map);
 		} catch (Exception e) {
 			log.info("dataCount : ", e);
 		}
@@ -104,7 +144,7 @@ public class GradeGuideServiceImpl implements GradeGuideService {
 		GradeGuide dto = null;
 		
 		try {
-			mapper.findByPrev(map);
+			dto = mapper.findByPrev(map);
 		} catch (Exception e) {
 			log.info("findByPrev : ", e);
 		}
@@ -116,7 +156,7 @@ public class GradeGuideServiceImpl implements GradeGuideService {
 		GradeGuide dto = null;
 		
 		try {
-			mapper.findByNext(map);
+			dto = mapper.findByNext(map);
 		} catch (Exception e) {
 			log.info("findByNext : ", e);
 		}
@@ -143,6 +183,11 @@ public class GradeGuideServiceImpl implements GradeGuideService {
 				throw e;
 			}
 		}
+	}
+
+	@Override
+	public boolean deleteUploadFile(String uploadPath, String filename) {
+		return storageService.deleteFile(uploadPath, filename);
 	}		
 
 }

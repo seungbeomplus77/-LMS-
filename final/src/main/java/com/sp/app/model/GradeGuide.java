@@ -25,6 +25,7 @@ public class GradeGuide {
     
     private long schoolId; // schoolMember 테이블 기본키
     private long categoryId;
-    
+    private String categoryName;
+
     private List<MultipartFile> selectFile;
 }

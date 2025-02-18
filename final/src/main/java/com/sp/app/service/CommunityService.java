@@ -8,7 +8,7 @@ import com.sp.app.model.Community;
 public interface CommunityService {
     public void insertCommunity(Community dto) throws Exception;
     public void updateCommunity(Community dto) throws Exception;
-    public void deleteCommunity(Community dto) throws Exception;
+    public void deleteCommunity(long communityNum, String studentId) throws Exception;
    
     public Community findCommunityById(long communityNum) throws Exception;
     public List<Community> listCommunity(Map<String, Object> map) throws Exception;

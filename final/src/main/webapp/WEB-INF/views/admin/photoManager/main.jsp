@@ -29,18 +29,30 @@
 <div class="body-title">
   <h3 class="me-5"><i class="bi bi-image"></i> 포토갤러리</h3>
 </div>
-<div class="gallery">
-    <div class="photo-box">
-      <img src="${pageContext.request.contextPath}/uploads/image/기본프로필.png" alt="Photo" class="img-fluid" style="object-fit: cover;">
-    </div>
-</div>
-  
+
+<div class="body-main">
+				<div class="row row-cols-4 px-1 py-1 g-2">
+					<c:forEach var="dto" items="${list}" varStatus="status">
+						<div>
+							<div class="col border rounded p-1 item">
+								<img src="${pageContext.request.contextPath}/uploads/photo/${dto.imageFilename}">
+								<p class="item-title">${dto.subject}</p>
+							</div>
+						</div>
+					</c:forEach>
+				</div>			 
+	  <div class="page-navigation">
+	  ${dataCount == 0 ? "페이칭 처리 테스트." : paging}
+	  </div>
+
 <div class="col text-end">
-  <button type="button" class="btn btn-primary" onclick="location.href='${pageContext.request.contextPath}/student/studentqa/write';">게시글 등록</button>
+  <button type="button" class="btn btn-primary" onclick="location.href='${pageContext.request.contextPath}/admin/photoManager/write';">게시글 등록</button>
 </div>    
   
   </div>
 </div>
+</div>
+
 </main>
 
 <footer class="w-100 bg-light.bg-gradient fw-lighter text-dark font-size small">

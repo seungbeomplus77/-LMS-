@@ -39,6 +39,7 @@
                 <option value="content" ${schType=="content"?"selected":""}>내용</option>
             </select>
         </div>
+        
         <div class="col-auto p-1">
             <input type="text" name="kwd" value="${kwd}" class="form-control" placeholder="검색어 입력">
         </div>

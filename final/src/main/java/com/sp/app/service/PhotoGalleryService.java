@@ -23,6 +23,10 @@ public interface PhotoGalleryService {
     
     // 조건에 따른 데이터 건수 조회 (페이징 등에서 활용)
     public int dataCount(Map<String, Object> map) throws Exception;
+	public PhotoGallery findByPrev(Map<String, Object> map);
+	public PhotoGallery findByNext(Map<String, Object> map);
+   
+	public boolean deleteUploadFile(String uploadPath, String filename);
     
-    public boolean deleteUploadFile(String uploadPath, String filename);
+    
 }

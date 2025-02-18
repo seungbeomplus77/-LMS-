@@ -8,7 +8,7 @@
     INSERT INTO photoGallery
       (photoGalleryNum, subject, content, hitCount, imageFilename, reg_date, modify_date, showphotoGallery, schoolId)
     VALUES
-      (photoGallery_seq.nextval, #{subject}, #{content}, #{hitCount}, #{imageFilename}, SYSDATE, SYSDATE, #{showphotoGallery}, #{schoolId})
+      (photoGallery_seq.nextval, #{subject}, #{content}, 0, #{imageFilename, jdbcType=VARCHAR}, SYSDATE, SYSDATE, #{showphotoGallery}, 10)
   </insert>
   
   <!-- 포토갤러리 수정 -->
@@ -16,11 +16,9 @@
     UPDATE photoGallery
     SET subject = #{subject},
         content = #{content},
-        hitCount = #{hitCount},
         imageFilename = #{imageFilename},
         modify_date = SYSDATE,
-        showphotoGallery = #{showphotoGallery},
-        schoolId = #{schoolId}
+        showphotoGallery = #{showphotoGallery}
     WHERE photoGalleryNum = #{photoGalleryNum}
   </update>
   
@@ -67,12 +65,14 @@
       </if>
     </where>
     ORDER BY photoGalleryNum DESC
+    OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
   </select>
   
   <!-- 조건에 따른 데이터 건수 조회 (페이징 등) -->
   <select id="dataCount" parameterType="map" resultType="int">
-    SELECT COUNT(*)
-    FROM photoGallery
+    SELECT NVL(COUNT(*), 0)
+    FROM photoGallery p
+    JOIN schoolMember sm ON sm.schoolId = p.schoolId
     <where>
       <if test="schoolId != null">
         AND schoolId = #{schoolId}

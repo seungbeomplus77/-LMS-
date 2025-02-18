@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.sp.app.mapper.CommunityReplyMapper">
   
@@ -10,40 +9,37 @@
 
   <!-- 댓글 등록 -->
   <insert id="insertCommunityReply" parameterType="com.sp.app.model.CommunityReply">
-    INSERT INTO communityReply (replyNum, communityNum, studentId, content, reg_date, parentNum, showReply, showCommunityReply)
-    VALUES (communityReply_seq.NEXTVAL, #{communityNum}, #{studentId}, #{content}, SYSDATE, #{parentNum}, #{showReply}, #{showCommunityReply})
+    INSERT INTO CommunityReply(replyNum, communityNum, studentId, subject, content, groupNum,
+      depth, orderNo, parent, reg_date)
+    VALUES (#{replyNum}, #{communityNum}, #{studentId}, #{subject}, #{content},
+      #{groupNum}, #{depth}, #{orderNo}, #{parent}, SYSDATE) 
   </insert>
-  
-  <!-- 댓글 수정 -->
-  <update id="updateCommunityReply" parameterType="com.sp.app.model.CommunityReply">
-    UPDATE communityReply
-    SET content = #{content},
-        modify_date = SYSDATE,
-        showReply = #{showReply},
-        showCommunityReply = #{showCommunityReply}
-    WHERE replyNum = #{replyNum}
-  </update>
-  
-  <!-- 댓글 삭제 -->
-  <delete id="deleteCommunityReply" parameterType="com.sp.app.model.CommunityReply">
-    DELETE FROM communityReply
-    WHERE replyNum = #{replyNum}
-  </delete>
-  
-  <!-- 댓글 순서 업데이트 (orderNo 갱신) -->
-  <update id="updateOrderNo" parameterType="map">
-    UPDATE communityReply
-    SET orderNo = #{orderNo}
-    WHERE replyNum = #{replyNum}
-  </update>
+
+  <sql id="where-list">
+    <if test="schType=='all' ">
+      ( INSTR(subject, #{kwd}) &gt; 0
+        OR DBMS_LOB.INSTR(content, #{kwd}) &gt; 0 )
+    </if>
+    <if test="schType=='subject' ">
+      INSTR(subject, #{kwd}) &gt; 0
+    </if>
+    <if test="schType=='content' ">
+      DBMS_LOB.INSTR(content, #{kwd}) &gt; 0
+    </if>
+    <if test="schType=='reg_date' ">
+      ( TO_CHAR(c.reg_date, 'YYYY-MM-DD') = #{kwd}
+        OR TO_CHAR(c.reg_date, 'YYYYMMDD') = #{kwd} )
+    </if>
+  </sql>
   
   <!-- 댓글 데이터 건수 조회 -->
   <select id="dataCount" parameterType="map" resultType="int">
-    SELECT COUNT(*) 
-    FROM communityReply
+    SELECT NVL(COUNT(*), 0) 
+    FROM communityReply c
+    JOIN schoolMember m ON c.studentId = m.userId
     <where>
-      <if test="communityNum != null">
-         AND communityNum = #{communityNum}
+      <if test="kwd != null and kwd != '' ">
+        <include refid="where-list"/>
       </if>
     </where>
   </select>
@@ -53,105 +49,86 @@
     SELECT replyNum, communityNum, studentId, content,
            TO_CHAR(reg_date, 'YYYY-MM-DD') AS reg_date,
            TO_CHAR(modify_date, 'YYYY-MM-DD') AS modify_date,
-           parentNum, showReply, showCommunityReply
-    FROM communityReply
+           groupNum, orderNo, depth
+    FROM communityReply c
+    JOIN schoolMember m ON c.studentId = m.studentId
     <where>
-      <if test="communityNum != null">
-         AND communityNum = #{communityNum}
+      <if test="kwd != null and kwd != '' ">
+        <include refid="where-list"/>
       </if>
     </where>
-    ORDER BY replyNum ASC
+    ORDER BY groupNum DESC, orderNo ASC
+    OFFSET #{offset} ROWS FETCH FIRST #{size} ROWS ONLY
   </select>
   
   <!-- 댓글 단건 조회 -->
   <select id="findById" parameterType="long" resultType="com.sp.app.model.CommunityReply">
     SELECT replyNum, communityNum, studentId, content,
            TO_CHAR(reg_date, 'YYYY-MM-DD') AS reg_date,
-           TO_CHAR(modify_date, 'YYYY-MM-DD') AS modify_date,
-           parentNum, showReply, showCommunityReply
-    FROM communityReply
+           groupNum, depth, orderNo, parent
+    FROM communityReply c
+    JOIN schoolMember m ON c.studentId = m.userId
     WHERE replyNum = #{replyNum}
   </select>
-  
+ 
   <!-- (옵션) 댓글 조회수 증가 (hitCount 필드가 있다면) -->
   <update id="updateHitCount" parameterType="long">
     UPDATE communityReply
     SET hitCount = hitCount + 1
-    WHERE replyNum = #{boardNum}
-  </update>
-  
-  <!-- 이전 댓글 조회 -->
-  <select id="findByPrev" parameterType="map" resultType="com.sp.app.model.CommunityReply">
-    SELECT *
-    FROM (
-      SELECT *
-      FROM communityReply
-      <where>
-         <if test="replyNum != null">
-            AND replyNum &lt; #{replyNum}
-         </if>
-         <if test="communityNum != null">
-            AND communityNum = #{communityNum}
-         </if>
-      </where>
-      ORDER BY replyNum DESC
-    )
-    WHERE ROWNUM = 1
-  </select>
-  
-  <!-- 다음 댓글 조회 -->
-  <select id="findByNext" parameterType="map" resultType="com.sp.app.model.CommunityReply">
-    SELECT *
-    FROM (
-      SELECT *
-      FROM communityReply
-      <where>
-         <if test="replyNum != null">
-            AND replyNum &gt; #{replyNum}
-         </if>
-         <if test="communityNum != null">
-            AND communityNum = #{communityNum}
-         </if>
-      </where>
-      ORDER BY replyNum ASC
-    )
-    WHERE ROWNUM = 1
-  </select>
-  
-    <!-- 댓글 좋아요/싫어요 등록 -->
-  <insert id="insertReplyLike" parameterType="map">
-    INSERT INTO communityReplyLike (replyNum, studentId, replyLike)
-    VALUES (#{replyNum}, #{studentId}, #{replyLike})
-  </insert>
-  
-  <!-- 댓글 좋아요/싫어요 삭제 -->
-  <delete id="deleteReply" parameterType="map">
-    DELETE FROM communityReplyLike
-    WHERE replyNum = #{replyNum} AND studentId = #{studentId}
-  </delete>
-  
-  <!-- 댓글 좋아요/싫어요 수 조회 -->
-  <select id="replyLikeCount" parameterType="map" resultType="map">
-    SELECT replyNum,
-           SUM(CASE WHEN replyLike = 1 THEN 1 ELSE 0 END) AS likeCount,
-           SUM(CASE WHEN replyLike = 0 THEN 1 ELSE 0 END) AS disLikeCount
-    FROM communityReplyLike
-    WHERE replyNum = #{replyNum}
-    GROUP BY replyNum
-  </select>
-  
-  <!-- 사용자가 댓글에 대해 좋아요/싫어요를 눌렀는지 조회 -->
-  <select id="userReplyLiked" parameterType="map" resultType="int">
-    SELECT replyLike
-    FROM communityReplyLike
-    WHERE replyNum = #{replyNum} AND studentId = #{studentId}
-  </select>
-  
-  <!-- 댓글 숨김 -->
-  <update id="updateReplyShowHide" parameterType="map">
-    UPDATE communityReply
-    SET showReply = #{showReply}
     WHERE replyNum = #{replyNum}
   </update>
+	
+	<!-- 이전글 -->
+	<select id="findByPrev" parameterType="map" resultType="com.sp.app.model.CommunityReply">
+		SELECT replyNum, subject
+		FROM communityReply c
+		schoolMember m ON c.studentId = m.userId
+		<where>
+			<if test="kwd != null and kwd != '' ">
+				<include refid="where-list"/>
+			</if>
+			<![CDATA[
+				AND ( (groupNum = #{groupNum} AND orderNo < #{orderNo})
+					  OR (groupNum > #{groupNum}) )
+			]]>
+		</where>
+		ORDER BY groupNum ASC, orderNo DESC
+		FETCH FIRST 1 ROWS ONLY
+	</select>
+	
+	<!-- 다음글 -->
+	<select id="findByNext" parameterType="map" resultType="com.sp.app.model.CommunityReply">
+		SELECT replyNum, subject
+		FROM communityReply c
+		JOIN schoolMember m ON c.studentId = m.userId
+		<where>
+			<if test="kwd != null and kwd != '' ">
+				<include refid="where-list"/>
+			</if>
+			<![CDATA[
+				AND ( (groupNum = #{groupNum} AND orderNo > #{orderNo})
+					  OR (groupNum < #{groupNum}) )
+			]]>
+		</where>
+		ORDER BY groupNum ASC, orderNo DESC
+		FETCH FIRST 1 ROWS ONLY
+	</select>
+	
+	<update id="updateOrderNo" parameterType="map">
+		UPDATE communityReply SET orderNo = orderNo + 1
+		WHERE groupNum = #{groupNum} AND orderNo &gt; #{orderNo}
+	</update>
+	
+	<update id="updateBoard" parameterType="com.sp.app.model.CommunityReply">
+		UPDATE communityReply SET subject = #{subject}, content = #{content}
+		WHERE replyNum = #{replyNum} AND studentId = #{studentId}
+	</update>
+	
+	<delete id="deleteBoard" parameterType="Long">
+		DELETE FROM communityReply
+		WHERE replyNum IN
+			( SELECT replyNum FROM communityReply START WITH replyNum = #{replyNum}
+				CONNECT BY PRIOR replyNum = parent )
+	</delete>
 
 </mapper>

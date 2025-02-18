@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
+import com.sp.app.common.MyUtil;
 import com.sp.app.mapper.CommunityMapper;
 import com.sp.app.model.Community;
 
@@ -16,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class CommunityServiceImpl implements CommunityService {
 	private final CommunityMapper mapper;
+	private final MyUtil myUtil;
 	
 	@Override
 	public void insertCommunity(Community dto) throws Exception {
@@ -40,9 +42,9 @@ public class CommunityServiceImpl implements CommunityService {
 	}
 
 	@Override
-	public void deleteCommunity(Community dto) throws Exception {
+	public void deleteCommunity(long communityNum, String studentId) throws Exception {
 		try {
-			mapper.deleteCommunity(dto);
+			mapper.deleteCommunity(communityNum);
 		} catch (Exception e) {
 			log.info("deleteCommunity : ", e);
 			throw e;
@@ -69,6 +71,7 @@ public class CommunityServiceImpl implements CommunityService {
 		
 		try {
 			list = mapper.listCommunity(map);
+			
 		} catch (Exception e) {
 			log.info("listCommunity : ", e);
 			throw e;
@@ -96,6 +99,7 @@ public class CommunityServiceImpl implements CommunityService {
 			mapper.updateHitCount(communityNum);
 		} catch (Exception e) {
 			log.info("updateCommunityHitCount : ", e);
+			throw e;
 		}
 		
 	}

@@ -116,4 +116,30 @@ public class PhotoGalleryServiceImpl implements PhotoGalleryService {
 		return storageService.deleteFile(uploadPath, filename);
 	}
 
+	@Override
+	public PhotoGallery findByPrev(Map<String, Object> map) {
+		PhotoGallery dto = null;
+		
+		try {
+			dto = mapper.findByPrev(map);
+		} catch (Exception e) {
+			log.info("findByPrev : ", e);
+		}
+		
+		return dto;
+	}
+
+	@Override
+	public PhotoGallery findByNext(Map<String, Object> map) {
+		PhotoGallery dto = null;
+		
+		try {
+			dto = mapper.findByNext(map);
+		} catch (Exception e) {
+			log.info("findByNext : ", e);
+		}
+		
+		return dto;
+	}
+
 }

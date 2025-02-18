@@ -20,8 +20,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.sp.app.common.MyUtil;
 import com.sp.app.common.PaginateUtil;
 import com.sp.app.common.StorageService;
+import com.sp.app.model.PhotoGallery;
 import com.sp.app.model.SchoolNews;
 import com.sp.app.model.SchoolNotice;
+import com.sp.app.service.PhotoGalleryService;
 import com.sp.app.service.SchoolNewsService;
 import com.sp.app.service.SchoolNoticeService;
 
@@ -150,8 +152,52 @@ public class NewsController {
 
 	}	
 	
+	private final PhotoGalleryService service3;
+	
 	@GetMapping("photo")
-	public String photo() {
+	public String photo(
+			@RequestParam(name = "page", defaultValue = "1") int current_page,
+			Model model,
+			HttpServletRequest req) throws Exception {
+		
+		try {
+			int size = 8;
+			int total_page;
+			int dataCount;
+			
+			Map<String, Object> map = new HashMap<String, Object>();
+			
+			dataCount = service3.dataCount(map);
+			total_page = paginateUtil.pageCount(dataCount, size);
+			
+			current_page = Math.min(current_page, total_page);
+			
+			int offset = (current_page - 1) * size;
+			if(offset < 0) offset = 0;
+			
+			map.put("offset", offset);
+			map.put("size", size);
+
+			List<PhotoGallery> list = service3.listPhotoGallery(map);
+			
+			String cp = req.getContextPath();
+			String query = "";
+			String listUrl = cp + "/news/photo";
+			String articleUrl = cp + "/photo/article?page=" + current_page;
+			String paging = paginateUtil.paging(current_page, total_page, listUrl);
+			
+			model.addAttribute("list", list);
+			model.addAttribute("dataCount", dataCount);
+			model.addAttribute("size", size);
+			model.addAttribute("total_page", total_page);
+			model.addAttribute("articleUrl", articleUrl);
+			model.addAttribute("page", current_page);
+			model.addAttribute("paging", paging);
+
+		} catch (Exception e) {
+			log.info("photo : ", e);
+		}
+		
 		return "news/photo";
 	}
     

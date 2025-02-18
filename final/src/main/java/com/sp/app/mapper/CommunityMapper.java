@@ -12,7 +12,7 @@ import com.sp.app.model.Community;
 public interface CommunityMapper {
 	public void insertCommunity(Community dto) throws SQLException;
 	public void updateCommunity(Community dto) throws SQLException;
-	public void deleteCommunity(Community dto) throws SQLException;
+	public void deleteCommunity(long communityNum) throws SQLException;
 	
 	public int dataCount(Map<String, Object> map);
 	public List<Community> listCommunity(Map<String, Object> map);

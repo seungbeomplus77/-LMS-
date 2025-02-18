@@ -21,6 +21,8 @@ public interface PhotoGalleryMapper {
     
     // 포토갤러리 단건 조회 (primary key 기준)
     public PhotoGallery findPhotoGalleryById(long photoGalleryNum) throws SQLException;
+	public PhotoGallery findByPrev(Map<String, Object> map);
+	public PhotoGallery findByNext(Map<String, Object> map);
     
     // 조건에 따른 포토갤러리 목록 조회 (검색, 페이징 등)
     public List<PhotoGallery> listPhotoGallery(Map<String, Object> map) throws SQLException;

@@ -14,7 +14,7 @@ public interface CommunityReplyMapper {
 	public long CommunitySeq();
 	public void insertCommunityReply(CommunityReply dto) throws SQLException;
 	public void updateCommunityReply(CommunityReply dto) throws SQLException;
-	public void deleteCommunityReply(long replyNum) throws SQLException;
+	public void deleteCommunityReply(Map<String, Object> paramMap) throws SQLException;
 	
 	public void updateOrderNo(Map<String, Object> map) throws SQLException;
 	

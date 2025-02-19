@@ -8,7 +8,7 @@ import com.sp.app.model.CommunityReply;
 public interface CommunityReplyService {
     public void insertCommunityReply(CommunityReply dto) throws Exception;
     public void updateCommunityReply(CommunityReply dto) throws Exception;
-    public void deleteCommunityReply(long replyNum) throws Exception;
+    public void deleteCommunityReply(Map<String, Object> paramMap) throws Exception;
     public int communityReplyDataCount(Map<String, Object> map) throws Exception;
     public List<CommunityReply> listCommunityReply(Map<String, Object> map) throws Exception;
     public CommunityReply findCommunityReplyById(long replyNum) throws Exception;

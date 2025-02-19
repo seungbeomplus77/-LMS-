@@ -12,6 +12,7 @@
 					<div class="col ms-2 align-self-center">
 						<div class="name">${dto.studentId}</div>
 						<div class="date">${dto.reg_date}</div>
+						
 					</div>
 				</div>
 			</div>
@@ -23,21 +24,20 @@
 				<div class="reply-menu">
 					<c:choose>
 						
-						<c:when test="${isAuthor == dto.studentId}">
-							<div class="deleteReplyAnswer reply-menu-item" 
-							     data-replyNum="${dto.replyNum}" 
-							     data-parentNum="${dto.parentNum}">
-								삭제
-							</div>
-							
-							<div class="hideReplyAnswer reply-menu-item" 
-							     data-replyNum="${dto.replyNum}" 
-							     data-showReply="${dto.showReply}">
-								<c:choose>
-									<c:when test="${dto.showReply == 1}">숨김</c:when>
-									<c:otherwise>표시</c:otherwise>
-								</c:choose>
-							</div>
+						<c:when test="${studentId == dto.studentId}">
+						    <div class="deleteReplyAnswer reply-menu-item" 
+						         data-replyNum="${dto.replyNum}" 
+						         data-parentNum="${dto.parentNum}">
+						        삭제
+						    </div>
+						    <div class="hideReplyAnswer reply-menu-item" 
+						         data-replyNum="${dto.replyNum}" 
+						         data-showReply="${dto.showReply}">
+						         <c:choose>
+						            <c:when test="${dto.showReply == 1}">숨김</c:when>
+						            <c:otherwise>표시</c:otherwise>
+						         </c:choose>
+						    </div>
 						</c:when>
 						
 						<c:when test="${employee}">

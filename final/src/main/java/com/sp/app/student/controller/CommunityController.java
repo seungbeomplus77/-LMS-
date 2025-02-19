@@ -1,5 +1,6 @@
 package com.sp.app.student.controller;
 
+import java.math.BigDecimal;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.HashMap;
@@ -175,16 +176,16 @@ public class CommunityController {
 	        map.put("studentId", userId);
 	        
 	        boolean isAuthor = userId.equals(dto.getStudentId());
-	        boolean userLiked = service.userCommunityLiked(map);
+	        boolean isUserLiked = service.userCommunityLiked(map);
 	        
 			model.addAttribute("dto", dto);
 			model.addAttribute("prevDto", prevDto);
 			model.addAttribute("nextDto", nextDto);
 
 			model.addAttribute("query", query);
+			model.addAttribute("pageNo", page);
 			model.addAttribute("page", page);
-			
-			model.addAttribute("userLiked", userLiked);
+			model.addAttribute("isUserLiked", isUserLiked);
 			model.addAttribute("isAuthor", isAuthor);
 			model.addAttribute("studentId", userId);
 			
@@ -273,7 +274,7 @@ public class CommunityController {
 	@PostMapping("insertBoardLike")
 	public Map<String, ?> insertBoardLike(
 			@RequestParam(name = "communityNum") long communityNum,
-			@RequestParam(name = "userLiked") boolean userLiked) {
+			@RequestParam(name = "isUserLiked") boolean isUserLiked) {
 		
 		Map<String, Object> model = new HashMap<>();
 		
@@ -288,7 +289,7 @@ public class CommunityController {
 			map.put("communityNum", communityNum);
 			map.put("studentId", userId);
 			
-			if(userLiked) {
+			if(isUserLiked) {
 				service.deleteCommunityLike(map); // 좋아요 해제
 			} else {
 				service.insertCommunityLike(map); // 좋아요 추가
@@ -407,6 +408,7 @@ public class CommunityController {
 			List<CommunityReply> listAnswer = replyService.listReplyAnswer(paramMap);
 			
 			model.addAttribute("listAnswer", listAnswer);
+			model.addAttribute("studentId", userId);
 			
 		} catch (Exception e) {
 			log.info("listReplyAnswer : ", e);
@@ -441,6 +443,92 @@ public class CommunityController {
 		model.put("count", count);
 		
 		return model;
-	}	
+	}
+	
+	// 댓글 및 댓글의 답글 삭제 : AJAX-JSON
+	@ResponseBody
+	@PostMapping("deleteReply")	
+	public Map<String, ?> deleteReply(@RequestParam Map<String, Object> paramMap) {
+		Map<String, Object> model = new HashMap<>();
+		
+		String state = "true";
+		try {
+	        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+	        String userId = auth.getName(); // 로그인한 사용자 아이디									
+			
+	        paramMap.put("studentId", userId);
+			
+	        replyService.deleteCommunityReply(paramMap);
+	        
+		} catch (Exception e) {
+			log.info("deleteReply : ", e);
+		}
+		
+		model.put("state", state);
+		
+		return model;
+	}
+	// 댓글의 좋아요/싫어요 추가 : AJAX-JSON
+	@ResponseBody
+	@PostMapping("insertReplyLike")
+	public Map<String, ?> insertReplyLike(
+			@RequestParam Map<String, Object> paramMap) {
+		Map<String, Object> model = new HashMap<>();
+		
+		String state = "true";
+		int likeCount = 0;
+		int disLikeCount = 0;
+		
+		try {
+	        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+	        String userId = auth.getName(); // 로그인한 사용자 아이디									
+			
+	        paramMap.put("studentId", userId);
+			replyService.insertReplyLike(paramMap);
+			
+			// 좋아요/싫어요 개수
+			Map<String, Object> countMap = replyService.replyLikeCount(paramMap);
+			
+			// 마이바티스의 resultType이 map 인 경우 int 는 BigDecimal로 넘어옴
+			// 오라클에서 resultType이 map 인 경우 컬럼명은 모두 대문자로 넘어옴
+			likeCount = ((BigDecimal)countMap.get("LIKECOUNT")).intValue();
+			disLikeCount = ((BigDecimal)countMap.get("DISLIKECOUNT")).intValue();
+			
+		} catch (DuplicateKeyException e) {
+			state = "liked";
+		} catch (Exception e) {
+			state = "false";
+		}
+		
+		model.put("likeCount", likeCount);
+		model.put("disLikeCount", disLikeCount);
+		model.put("state", state);
+		
+		return model;
+	}
+	
+	// 댓글 숨김/표시 : AJAX-JSON
+	@ResponseBody
+	@PostMapping("replyShowHide")
+	public Map<String, ?> replyShowHide(
+			@RequestParam Map<String, Object> paramMap) {
+		Map<String, Object> model = new HashMap<>();
+		
+		String state = "true";
+		try {
+	        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+	        String userId = auth.getName(); // 로그인한 사용자 아이디									
+			
+	        paramMap.put("studentId", userId);
+			
+			replyService.updateReplyShowHide(paramMap);
+			
+		} catch (Exception e) {
+			state = "false";
+		}
+		
+		model.put("state", state);
+		return model;
+	}
 	
 }

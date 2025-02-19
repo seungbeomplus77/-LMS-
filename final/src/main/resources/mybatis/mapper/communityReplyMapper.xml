@@ -15,7 +15,16 @@
 	    VALUES 
 	        (communityReply_seq.nextval, #{communityNum}, #{studentId}, #{content}, SYSDATE, #{parentNum}, 1, 0)
 	</insert>
-
+	  
+	  <!-- 댓글 삭제 -->
+	  <delete id="deleteCommunityReply" parameterType="map">
+	    DELETE FROM communityReply
+	    WHERE replyNum = #{replyNum}
+		<if test="mode == 'reply' ">
+			OR parentNum = #{replyNum}
+		</if>
+	  </delete>
+  
   <sql id="where-list">
     <if test="schType=='all' ">
       ( INSTR(subject, #{kwd}) &gt; 0
@@ -110,6 +119,33 @@
     </if>
     ORDER BY replyNum DESC
   </select>
+  
+  <!-- 댓글 좋아요 / 싫어요 등록 -->
+  <insert id="insertReplyLike" parameterType="map">
+    INSERT INTO communityReplyLike (replyNum, studentId, replyLike)
+    VALUES (#{replyNum}, #{studentId}, #{replyLike})
+  </insert>
+  
+  <!-- 댓글 좋아요 / 싫어요 수 조회 -->
+  <select id="replyLikeCount" parameterType="map" resultType="map">
+		SELECT COUNT(DECODE(replyLike, 1, 1)) likeCount,
+			COUNT(DECODE(replyLike, 0, 1)) disLikeCount
+		FROM communityReplyLike
+		WHERE replyNum=#{replyNum}
+  </select>
+  
+  <!-- 사용자가 댓글에 대해 좋아요/싫어요를 눌렀는지 조회 -->
+  <select id="userReplyLiked" parameterType="map" resultType="int">
+    SELECT replyLike
+    FROM communityReplyLike
+    WHERE replyNum = #{replyNum} AND studentId = #{studentId}
+  </select>  
+   <!-- 댓글 숨김/표시 업데이트 -->
+  <update id="updateReplyShowHide" parameterType="map">
+    UPDATE communityReply
+    SET showReply = #{showReply}
+    WHERE replyNum = #{replyNum}
+  </update>
  
   <!-- (옵션) 댓글 조회수 증가 (hitCount 필드가 있다면) -->
   <update id="updateHitCount" parameterType="long">

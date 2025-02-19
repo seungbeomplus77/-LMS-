@@ -48,9 +48,9 @@ public class CommunityReplyServiceImpl implements CommunityReplyService {
 	}
 
 	@Override
-	public void deleteCommunityReply(long replyNum) throws Exception {
+	public void deleteCommunityReply(Map<String, Object> paramMap) throws Exception {
 		try {
-			mapper.deleteCommunityReply(replyNum);
+			mapper.deleteCommunityReply(paramMap);
 		} catch (Exception e) {
 			log.info("deleteCommunityReply : ", e);
 		}

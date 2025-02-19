@@ -1,7 +1,5 @@
 package com.sp.app.model;
 
-import org.springframework.beans.factory.annotation.Value;
-
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -26,8 +24,7 @@ public class CommunityReply {
     private int likeCount;   // 좋아요 카운트
     private int disLikeCount;// 싫어요 카운트
 
-    @Value("-1")
-    private int userLiked;   // 현재 사용자가 좋아요/싫어요를 눌렀는지 (-1: 미체크, 1: 좋아요, 0: 싫어요)
+    private int userLiked = -1;  // 현재 사용자가 좋아요/싫어요를 눌렀는지 (-1: 미체크, 1: 좋아요, 0: 싫어요)
 
     // 추가된 컬럼들 (계층 구조 및 정렬을 위한 필드)
     private int depth;     // 댓글의 깊이 (최상위 댓글: 0, 답글: 1, ...)

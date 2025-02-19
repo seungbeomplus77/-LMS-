@@ -174,7 +174,7 @@ $(function(){
 		
 		let url = '${pageContext.request.contextPath}/student/community/insertBoardLike';
 		let communityNum = '${dto.communityNum}';
-		let params = {communityNum:communityNum, userLiked:userLiked};
+		let params = {communityNum:communityNum, isUserLiked:userLiked};
 		
 		const fn = function(data) {
 			let state = data.state;
@@ -278,9 +278,10 @@ $(function(){
 });
 
 // 댓글 삭제
+
 $(function(){
 	$('.reply').on('click', '.deleteReply', function(){
-		if(! confirm('게시글을 삭제하시겠습니까 ? ')) {
+		if(! confirm('댓글을 삭제하시겠습니까 ? ')) {
 			return false;
 		}
 		
@@ -288,7 +289,7 @@ $(function(){
 		let page = $(this).attr('data-pageNo');
 		
 		let url = '${pageContext.request.contextPath}/student/community/deleteReply';
-		let params = {replyNum:replyNum, mode:'reply'};
+		let params = {replyNum:replyNum, mode: 'reply'};
 		
 		const fn = function(data) {
 			listPage(page);

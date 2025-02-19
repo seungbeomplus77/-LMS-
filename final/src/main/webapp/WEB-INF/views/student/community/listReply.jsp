@@ -24,7 +24,7 @@
 			    <div class="reply-menu">
 			        <c:choose>
 			          
-			            <c:when test="${employee}">
+			            <c:when test="${studentId == dto.studentId}">
 			                <div class="deleteReply reply-menu-item" data-replyNum="${dto.replyNum}" data-pageNo="${pageNo}">삭제</div>
 			                <div class="blockReply reply-menu-item">차단</div>
 			            </c:when>
@@ -58,7 +58,7 @@
 					<div id="listReplyAnswer${dto.replyNum}" class="answer-list"></div>
 					<div>
 						<textarea class="form-control m-2"></textarea>
-					</div>
+					</div>	
 					<div class="text-end pe-2 pb-1">
 						<button type="button" class="btn btn-light btnSendReplyAnswer" data-replyNum="${dto.replyNum}">답글 등록</button>
 					</div>

@@ -45,6 +45,22 @@
     </if>
   </where>
 </select>
+	
+	<select id="findCommunityById" parameterType="Long"
+			resultType="com.sp.app.model.Community">
+		SELECT b.communityNum, b.studentId, subject, content,
+			   hitCount, b.reg_date, block,
+			   NVL(boardLikeCount, 0) boardLikeCount
+		FROM community b
+		JOIN schoolMember m ON b.studentId = m.userId
+		LEFT OUTER JOIN (
+			SELECT communityNum, COUNT(*) boardLikeCount
+			FROM communityLike
+			WHERE communityNum = #{communityNum}
+			GROUP BY communityNum
+		) bc ON b.communityNum = bc.communityNum
+		WHERE b.communityNum = #{communityNum} AND block = 0		
+	</select>  
   
   <!-- 게시글 수정 -->
   <update id="updateCommunity" parameterType="com.sp.app.model.Community">

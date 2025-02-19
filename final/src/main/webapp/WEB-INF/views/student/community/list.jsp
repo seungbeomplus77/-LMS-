@@ -101,7 +101,7 @@
     		${dto.categoryNum}
     	</td>
     	<td>
-			<a href="${pageContext.request.contextPath}/student/community/article/${dto.communityNum}?page=${page}${not empty query ? '&' : ''}${query}" class="text-reset">
+			<a href="${pageContext.request.contextPath}/student/community/article/${dto.communityNum}?${query}">
 			    ${dto.subject}
 			</a>
     	</td>

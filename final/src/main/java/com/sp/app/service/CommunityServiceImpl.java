@@ -57,7 +57,7 @@ public class CommunityServiceImpl implements CommunityService {
 		Community dto = null;
 		
 		try {
-			dto = mapper.findById(communityNum);
+			dto = mapper.findCommunityById(communityNum);
 		} catch (Exception e) {
 			log.info("findCommunityById : ", e);
 		}

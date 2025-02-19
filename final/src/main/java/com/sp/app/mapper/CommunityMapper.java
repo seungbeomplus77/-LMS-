@@ -17,7 +17,7 @@ public interface CommunityMapper {
 	public int dataCount(Map<String, Object> map);
 	public List<Community> listCommunity(Map<String, Object> map);
 	
-	public Community findById(long communityNum);
+	public Community findCommunityById(long communityNum);
 	public void updateHitCount(long communityNum) throws SQLException;
 	public Community findByPrev(Map<String, Object> map);
 	public Community findByNext(Map<String, Object> map);

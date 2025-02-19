@@ -20,6 +20,8 @@ public class Community {
     private long categoryNum;
     private String categoryName;
     
+    
+    private String userId;
 	private int replyCount;
 	private int boardLikeCount;
 }

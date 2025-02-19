@@ -89,7 +89,7 @@ public class EnterManagerController {
 	        if (!kwd.isBlank()) {
 	            query = "schType=" + schType + "&kwd=" + URLEncoder.encode(kwd, "utf-8");
 	            listUrl += "?" + query;
-	        }
+	        }	
 
 	        String paging = paginateUtil.paging(current_page, total_page, listUrl);
 

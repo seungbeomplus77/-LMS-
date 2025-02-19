@@ -110,14 +110,8 @@
     WHERE communityNum = #{communityNum} AND studentId = #{studentId}
   </select>
   
-  <!-- 댓글 등록 (커뮤니티 댓글) -->
-  <insert id="insertReply" parameterType="com.sp.app.model.CommunityReply">
-    INSERT INTO communityReply (replyNum, communityNum, studentId, content, reg_date, parentNum, showReply, showCommunityReply)
-    VALUES (communityReply_seq.nextval, #{communityNum}, #{studentId}, #{content}, SYSDATE, #{parentNum}, 1, 0)
-  </insert>
-  
   <!-- 댓글 수 조회 -->
-  <select id="replyCount" parameterType="map" resultType="int">
+  <select id="replyCount" parameterType="map" resultType="int">c.studentId = m.userId
     SELECT NVL(COUNT(*), 0) 
     FROM communityReply
     WHERE communityNum = #{communityNum} AND parentNum = 0 AND block = 0
@@ -159,31 +153,7 @@
     ORDER BY r.replyNum DESC
     OFFSET #{offset} ROWS FETCH FIRST #{size} ROWS ONLY		
   </select>
-  
-  <!-- 답글 리스트 -->
-  <select id="listReplyAnswer" parameterType="map"
-          resultType="com.sp.app.model.CommunityReply">
-    SELECT replyNum, communityNum, r.studentId, content,
-           reg_date, parentNum, showReply
-    FROM communityReply r
-
-    JOIN schoolMember m ON r.studentId = m.userId AND block = 0
-    WHERE parentNum = #{parentNum}
-    <if test="schoolId == 10">
-      AND ( showReply = 1 OR ( showReply = 0 AND r.studentId = #{studentId} ))
-    </if>
-    ORDER BY replyNum DESC
-  </select>
-    
-  <select id="replyAnswerCount" parameterType="map"
-          resultType="Integer">
-    SELECT NVL(COUNT(*), 0)
-    FROM communityReply
-    WHERE parentNum = #{parentNum} AND block = 0
-    <if test="schoolId == 10">
-      AND ( showReply = 1 OR ( showReply = 0 AND studentId = #{studentId} ))
-    </if>
-  </select>  	
+ 
   
   <!-- 댓글 삭제 -->
   <delete id="deleteReply" parameterType="map">
@@ -284,7 +254,7 @@
   <select id="findByNext" parameterType="map" resultType="com.sp.app.model.Community">
     SELECT communityNum, subject
     FROM community c
-    JOIN schoolMember m ON c.studentId = m.studentId
+    JOIN schoolMember m ON c.studentId = m.userId
     <where>
       <if test="kwd != null and kwd != '' ">
         <include refid="where-list"/>

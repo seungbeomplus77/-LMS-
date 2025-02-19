@@ -24,28 +24,9 @@ public class CommunityReplyServiceImpl implements CommunityReplyService {
 	private final MyUtil myUtil;
 	
 	@Override
-	public void insertCommunityReply(CommunityReply dto, String mode) throws Exception {
+	public void insertCommunityReply(CommunityReply dto) throws Exception {
 		try {
-			long seq = mapper.CommunitySeq();
-			
-			if (mode.equals("write")) { // 새글 등록시
-				dto.setReplyNum(seq);
-				dto.setGroupNum(seq);
-				dto.setDepth(0);
-				dto.setOrderNo(0);
-				dto.setParent(0);
-			} else { // 답글 등록시
-				// orderNo 변경
-				Map<String, Object> map = new HashMap<>();
-				map.put("groupNum", dto.getGroupNum());
-				map.put("orderNo", dto.getOrderNo());
-				mapper.updateOrderNo(map);
-				
-				dto.setReplyNum(seq);
-				dto.setDepth(dto.getDepth() + 1);
-				dto.setOrderNo(dto.getOrderNo() + 1);
-			}
-			
+
 			mapper.insertCommunityReply(dto);
 		
 		} catch (Exception e) {
@@ -225,6 +206,46 @@ public class CommunityReplyServiceImpl implements CommunityReplyService {
 			
 			throw e;
 		}
+	}
+
+	@Override
+	public void insertReply(CommunityReply dto) throws Exception {
+		try {
+			mapper.insertReply(dto);
+		} catch (Exception e) {
+			log.info("insertReply : ", e);
+		}
+		
+	}
+
+	@Override
+	public List<CommunityReply> listReplyAnswer(Map<String, Object> map) {
+		List<CommunityReply> list = null;
+		
+		try {
+			list = mapper.listReplyAnswer(map);
+			
+			for(CommunityReply dto : list) {
+				dto.setContent(myUtil.htmlSymbols(dto.getContent()));
+			}
+		} catch (Exception e) {
+			log.info("listReplyAnswer : ", e);
+		}
+		
+		return list;
+	}
+
+	@Override
+	public int replyAnswerCount(Map<String, Object> map) {
+		int result = 0;
+		
+		try {
+			result = mapper.replyAnswerCount(map);
+		} catch (Exception e) {
+			log.info("replyAnswerCount : ", e);
+		}
+		
+		return result;
 	}
 
 }

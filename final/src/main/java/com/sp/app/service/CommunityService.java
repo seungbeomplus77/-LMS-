@@ -23,4 +23,5 @@ public interface CommunityService {
 	public void deleteCommunityLike(Map<String, Object> map) throws Exception;
 	public int CommunityLikeCount(long num);
 	public boolean userCommunityLiked(Map<String, Object> map);
+
 }

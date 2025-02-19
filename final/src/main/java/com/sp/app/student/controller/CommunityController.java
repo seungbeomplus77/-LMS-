@@ -22,10 +22,13 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.sp.app.common.MyUtil;
 import com.sp.app.common.PaginateUtil;
 import com.sp.app.model.Community;
+import com.sp.app.model.CommunityReply;
 import com.sp.app.model.SessionInfo;
+import com.sp.app.service.CommunityReplyService;
 import com.sp.app.service.CommunityService;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,6 +39,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/student/community/*")
 public class CommunityController {
 	private final CommunityService service;
+	private final CommunityReplyService replyService;
 	private final PaginateUtil paginateUtil;
 	private final MyUtil myUtil;
 	
@@ -167,7 +171,9 @@ public class CommunityController {
 			
 	        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 	        String userId = auth.getName(); // 로그인한 사용자 아이디
-
+	        
+	        map.put("studentId", userId);
+	        
 	        boolean isAuthor = userId.equals(dto.getStudentId());
 	        boolean userLiked = service.userCommunityLiked(map);
 	        
@@ -262,7 +268,7 @@ public class CommunityController {
 		return "redirect:/student/community/list?" + query;
 	}
 	
-	// 게시글 좋아요 추가/삭제 : AJAX-JSON
+	// 게시글 좋아요 추가/삭제
 	@ResponseBody
 	@PostMapping("insertBoardLike")
 	public Map<String, ?> insertBoardLike(
@@ -300,5 +306,141 @@ public class CommunityController {
 		model.put("boardLikeCount", boardLikeCount);
 		
 		return model;
+	}
+	
+	// 댓글, 답글 등록
+	@PostMapping("insertReply")
+	@ResponseBody
+	public Map<String, Object> insertReply(CommunityReply dto,
+			@RequestParam(name = "parentNum", defaultValue = "0") long parentNum) {
+		Map<String, Object> model = new HashMap<>();
+		
+		String state = "true";
+		try {
+	        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+	        String userId = auth.getName(); // 로그인한 사용자 아이디						
+	       
+	        dto.setStudentId(userId);
+			
+			dto.setParentNum(parentNum);
+	        
+	        replyService.insertCommunityReply(dto);
+		
+		} catch (Exception e) { 	
+			state = "false";
+		}
+		
+		model.put("state", state);
+		
+		return model;
+	}
+	
+	// 댓글 리스트 : AJAX-TEXT
+	@GetMapping("listReply")
+	public String listReply(
+			@RequestParam(name = "communityNum") long communityNum,
+			@RequestParam(name = "pageNo", defaultValue = "1") int current_page,
+			Model model,
+			HttpServletResponse resp) throws Exception {
+		
+		try {
+	        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+	        String userId = auth.getName(); // 로그인한 사용자 아이디						
+			
+			int size = 5;
+			int total_page = 0;
+			int dataCount = 0;
+			
+			Map<String, Object> map = new HashMap<>();
+			map.put("communityNum", communityNum);
+			map.put("studentId", userId);
+			
+			dataCount = replyService.communityReplyDataCount(map);
+			
+			total_page = paginateUtil.pageCount(dataCount, size);
+			current_page = Math.min(current_page, total_page);
+			
+			int offset = (current_page - 1) * size;
+			if(offset < 0) offset = 0;
+			
+			map.put("offset", offset);
+			map.put("size", size);
+			
+			List<CommunityReply> listReply = replyService.listCommunityReply(map);
+			
+			// 페이징-자바스크립트 함수 호출
+			// listPage : 페이지를 클릭하면 호출할 자바스크립트 함수명
+			String paging = paginateUtil.pagingMethod(
+					current_page, total_page, "listPage");
+			
+			model.addAttribute("listReply", listReply);
+			model.addAttribute("pageNo", current_page);
+			model.addAttribute("replyCount", dataCount);
+			model.addAttribute("total_page", total_page);
+			model.addAttribute("paging", paging);
+			model.addAttribute("studentId", userId);
+			model.addAttribute("communityNum", communityNum);
+			
+		} catch (Exception e) {
+			log.info("listReply : ", e);
+			
+			resp.sendError(406);
+			throw e;
+		}
+		
+		return "student/community/listReply";
 	}	
+	
+	// 댓글의 답글 리스트 : AJAX-TEXT
+	@GetMapping("listReplyAnswer")
+	public String listReplyAnswer(
+			@RequestParam Map<String, Object> paramMap,
+			Model model,
+			HttpServletResponse resp)throws Exception {
+		
+		try {
+	        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+	        String userId = auth.getName(); // 로그인한 사용자 아이디						
+			
+	        paramMap.put("studentId", userId);
+	        
+			List<CommunityReply> listAnswer = replyService.listReplyAnswer(paramMap);
+			
+			model.addAttribute("listAnswer", listAnswer);
+			
+		} catch (Exception e) {
+			log.info("listReplyAnswer : ", e);
+			
+			resp.sendError(406);
+			throw e;
+		}
+		
+		return "student/community/listReplyAnswer";
+	}
+	
+	// 댓글별 답글 개수 : AJAX-JSON
+	@ResponseBody
+	@PostMapping("countReplyAnswer")
+	public Map<String, ?> countReplyAnswer(
+			@RequestParam Map<String, Object> paramMap) throws Exception {
+		
+		Map<String, Object> model = new HashMap<>();
+		
+		int count = 0;
+		try {
+	        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+	        String userId = auth.getName(); // 로그인한 사용자 아이디						
+			
+	        paramMap.put("studentId", userId);
+			
+			count = replyService.replyAnswerCount(paramMap);
+		} catch (Exception e) {
+			log.info("countReplyAnswer : ", e);
+		}
+		
+		model.put("count", count);
+		
+		return model;
+	}	
+	
 }

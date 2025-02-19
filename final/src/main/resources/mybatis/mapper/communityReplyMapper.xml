@@ -7,13 +7,14 @@
     SELECT communityReply_seq.NEXTVAL FROM dual
   </select>
 
-  <!-- 댓글 등록 -->
-  <insert id="insertCommunityReply" parameterType="com.sp.app.model.CommunityReply">
-    INSERT INTO CommunityReply(replyNum, communityNum, studentId, subject, content, groupNum,
-      depth, orderNo, parent, reg_date)
-    VALUES (#{replyNum}, #{communityNum}, #{studentId}, #{subject}, #{content},
-      #{groupNum}, #{depth}, #{orderNo}, #{parent}, SYSDATE) 
-  </insert>
+
+	<!-- 댓글/답글 등록 -->
+	<insert id="insertCommunityReply" parameterType="com.sp.app.model.CommunityReply">
+	    INSERT INTO communityReply 
+	        (replyNum, communityNum, studentId, content, reg_date, parentNum, showReply, showCommunityReply)
+	    VALUES 
+	        (communityReply_seq.nextval, #{communityNum}, #{studentId}, #{content}, SYSDATE, #{parentNum}, 1, 0)
+	</insert>
 
   <sql id="where-list">
     <if test="schType=='all' ">
@@ -27,17 +28,18 @@
       DBMS_LOB.INSTR(content, #{kwd}) &gt; 0
     </if>
     <if test="schType=='reg_date' ">
-      ( TO_CHAR(c.reg_date, 'YYYY-MM-DD') = #{kwd}
-        OR TO_CHAR(c.reg_date, 'YYYYMMDD') = #{kwd} )
+      ( TO_CHAR(c.reg_date, 'YYYYMMDD') = #{kwd}
+        OR TO_CHAR(c.reg_date, 'YYYY-MM-DD') = #{kwd} )
     </if>
   </sql>
-  
+ 
   <!-- 댓글 데이터 건수 조회 -->
   <select id="dataCount" parameterType="map" resultType="int">
     SELECT NVL(COUNT(*), 0) 
     FROM communityReply c
     JOIN schoolMember m ON c.studentId = m.userId
     <where>
+    	c.communityNum = #{communityNum}
       <if test="kwd != null and kwd != '' ">
         <include refid="where-list"/>
       </if>
@@ -45,21 +47,34 @@
   </select>
   
   <!-- 댓글 목록 조회 -->
-  <select id="listCommunityReply" parameterType="map" resultType="com.sp.app.model.CommunityReply">
-    SELECT replyNum, communityNum, studentId, content,
-           TO_CHAR(reg_date, 'YYYY-MM-DD') AS reg_date,
-           TO_CHAR(modify_date, 'YYYY-MM-DD') AS modify_date,
-           groupNum, orderNo, depth
-    FROM communityReply c
-    JOIN schoolMember m ON c.studentId = m.studentId
-    <where>
-      <if test="kwd != null and kwd != '' ">
-        <include refid="where-list"/>
-      </if>
-    </where>
-    ORDER BY groupNum DESC, orderNo ASC
-    OFFSET #{offset} ROWS FETCH FIRST #{size} ROWS ONLY
-  </select>
+	<select id="listCommunityReply" parameterType="map" resultType="com.sp.app.model.CommunityReply">
+	    SELECT 
+	        c.replyNum,
+	        c.communityNum,
+	        c.studentId,
+	        c.content,
+	        c.reg_date,
+	        c.groupNum,
+	        c.orderNo,
+	        c.depth,
+	        (
+	            SELECT COUNT(*)
+	            FROM communityReply r
+	            WHERE r.parentNum = c.replyNum
+	              AND r.block = 0  -- block = 0
+	        ) AS answerCount
+	    FROM communityReply c
+	    JOIN schoolMember m ON c.studentId = m.userId
+	    <where>
+	        c.communityNum = #{communityNum}
+	        <if test="kwd != null and kwd != '' ">
+	            <include refid="where-list"/>
+	        </if>
+	    </where>
+	    ORDER BY c.groupNum DESC, c.orderNo ASC
+	    OFFSET #{offset} ROWS FETCH FIRST #{size} ROWS ONLY
+	</select>
+
   
   <!-- 댓글 단건 조회 -->
   <select id="findById" parameterType="long" resultType="com.sp.app.model.CommunityReply">
@@ -69,6 +84,31 @@
     FROM communityReply c
     JOIN schoolMember m ON c.studentId = m.userId
     WHERE replyNum = #{replyNum}
+  </select>
+    
+    <select id="replyAnswerCount" parameterType="map"
+          resultType="Integer">
+    SELECT NVL(COUNT(*), 0)
+    FROM communityReply
+    WHERE parentNum = #{parentNum} AND block = 0
+    <if test="schoolId == 10">
+      AND ( showReply = 1 OR ( showReply = 0 AND studentId = #{studentId} ))
+    </if>
+  </select>  	
+   
+   <!-- 답글 리스트 -->
+  <select id="listReplyAnswer" parameterType="map"
+          resultType="com.sp.app.model.CommunityReply">
+    SELECT replyNum, communityNum, r.studentId, content,
+           reg_date, parentNum, showReply
+    FROM communityReply r
+
+    JOIN schoolMember m ON r.studentId = m.userId AND block = 0
+    WHERE parentNum = #{parentNum}
+    <if test="schoolId == 10">
+      AND ( showReply = 1 OR ( showReply = 0 AND r.studentId = #{studentId} ))
+    </if>
+    ORDER BY replyNum DESC
   </select>
  
   <!-- (옵션) 댓글 조회수 증가 (hitCount 필드가 있다면) -->

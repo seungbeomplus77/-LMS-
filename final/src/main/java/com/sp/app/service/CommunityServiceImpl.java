@@ -179,4 +179,5 @@ public class CommunityServiceImpl implements CommunityService {
 		
 		return result;
 	}
+
 }

@@ -34,4 +34,8 @@ public interface CommunityReplyMapper {
     
 	// 댓글 숨김/표시
 	public void updateReplyShowHide(Map<String, Object> map) throws SQLException;
+	public List<CommunityReply> listReplyAnswer(Map<String, Object> map);
+	public void insertReply(CommunityReply dto) throws SQLException;
+	
+	public int replyAnswerCount(Map<String, Object> map);
 }

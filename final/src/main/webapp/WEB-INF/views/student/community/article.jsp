@@ -224,7 +224,7 @@ function listPage(page) {
 // 댓글 및 댓글의 답글 등록
 $(function(){
 	$('.btnSendReply').click(function(){
-		let num = '${dto.communityNum}';
+		let communityNum ='${dto.communityNum}';
 		const $tb = $(this).closest('table');
 		
 		let content = $tb.find('textarea').val().trim();

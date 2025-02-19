@@ -11,9 +11,10 @@ import lombok.Setter;
 @NoArgsConstructor
 public class CommunityReply {
     private long replyNum;
-    private long parent; // 기존 parentNum을 parent로 변경 (부모 댓글의 ID)
+    private long parentNum; // 기존 parentNum을 parent로 변경 (부모 댓글의 ID)
+    private long communityNum;
+    private String studentId; // schoolmember의 기본키
     
-    private long studentId; // schoolmember의 기본키
     private String content;  // 댓글 내용
     private String reg_date; // 등록 날짜
     private String modify_date; // 수정 날짜

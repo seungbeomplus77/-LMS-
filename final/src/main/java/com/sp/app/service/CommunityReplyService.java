@@ -6,7 +6,7 @@ import java.util.Map;
 import com.sp.app.model.CommunityReply;
 
 public interface CommunityReplyService {
-    public void insertCommunityReply(CommunityReply dto, String mode) throws Exception;
+    public void insertCommunityReply(CommunityReply dto) throws Exception;
     public void updateCommunityReply(CommunityReply dto) throws Exception;
     public void deleteCommunityReply(long replyNum) throws Exception;
     public int communityReplyDataCount(Map<String, Object> map) throws Exception;
@@ -23,4 +23,10 @@ public interface CommunityReplyService {
     
 	// 댓글 숨김/표시
 	public void updateReplyShowHide(Map<String, Object> map) throws Exception;
+	
+	// 댓글의 답글
+	public List<CommunityReply> listReplyAnswer(Map<String, Object> map);
+	public int replyAnswerCount(Map<String, Object> map);
+	
+	public void insertReply(CommunityReply dto) throws Exception;
 }

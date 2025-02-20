@@ -24,7 +24,7 @@
           <a class="nav-link" href="${pageContext.request.contextPath}/teacher/notice/list">알림마당</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link " href="${pageContext.request.contextPath}/teacher/teacherqa/list">Q&A</a>
+          <a class="nav-link " href="${pageContext.request.contextPath}/qa/list">Q&A</a>
         </li>
         <li class="nav-item">
           <a class="nav-link " href="${pageContext.request.contextPath}/teacher/mypage/passwordCheck">마이페이지</a>

@@ -25,7 +25,7 @@
           <a class="nav-link" href="${pageContext.request.contextPath}/student/community/list">나누리</a>
         </li> 	
         <li class="nav-item">
-          <a class="nav-link " href="${pageContext.request.contextPath}/student/studentqa/list">Q&A</a>
+          <a class="nav-link " href="${pageContext.request.contextPath}/qa/list">Q&A</a>
         </li>
         <li class="nav-item">
           <a class="nav-link " href="${pageContext.request.contextPath}/student/mypage/passwordCheck">마이페이지</a>

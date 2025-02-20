@@ -12,7 +12,8 @@ import com.sp.app.model.Qa;
 public interface QaMapper {
     // Q&A 등록
     public void insertQa(Qa dto) throws SQLException;
-    
+    public void updateAnswer(Qa dto) throws SQLException;
+   
     // Q&A 수정
     public void updateQa(Qa dto) throws SQLException;
     

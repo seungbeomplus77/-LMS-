@@ -10,9 +10,20 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 public class UserLevelController {
     @ModelAttribute
     public void addLevel(Model model) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    	// 교직원
+    	Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         boolean employee = auth.getAuthorities().stream()
             .anyMatch(a -> a.getAuthority().equals("ROLE_EMPLOYEE"));
         model.addAttribute("employee", employee);
+        
+        // 학생
+        boolean student = auth.getAuthorities().stream()
+            .anyMatch(a -> a.getAuthority().equals("ROLE_STUDENT"));
+        model.addAttribute("student", student);        
+       
+        // 교사
+        boolean teacher = auth.getAuthorities().stream()
+            .anyMatch(a -> a.getAuthority().equals("ROLE_TEACHER"));
+        model.addAttribute("teacher", teacher);        
     }
 }

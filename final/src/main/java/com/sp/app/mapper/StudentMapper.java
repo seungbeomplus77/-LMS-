@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
 
+import com.sp.app.model.SchoolMember;
 import com.sp.app.model.Student;
 
 @Mapper
@@ -23,5 +24,5 @@ public interface StudentMapper {
     public Student findStudentById(long schoolId) throws SQLException;
     
     // 조건에 따른 학생 목록 조회 (예: 페이징, 검색 조건 등)
-    public List<Student> listStudent(Map<String, Object> map) throws SQLException;
+    public List<SchoolMember> listFindMember(Map<String, Object> map);
 }

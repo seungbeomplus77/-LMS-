@@ -18,7 +18,7 @@
           <a class="nav-link" href="${pageContext.request.contextPath}/teacher/studentManager/main">학생관리</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="${pageContext.request.contextPath}/teacher/campus/list">캠퍼스</a>
+          <a class="nav-link" href="${pageContext.request.contextPath}/teacher/campus/sj101">캠퍼스</a>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="${pageContext.request.contextPath}/teacher/notice/list">알림마당</a>

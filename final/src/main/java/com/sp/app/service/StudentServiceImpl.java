@@ -6,6 +6,7 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 
 import com.sp.app.mapper.StudentMapper;
+import com.sp.app.model.SchoolMember;
 import com.sp.app.model.Student;
 
 import lombok.RequiredArgsConstructor;
@@ -60,14 +61,15 @@ public class StudentServiceImpl implements StudentService {
 		return dto;
 	}
 
+
 	@Override
-	public List<Student> listStudent(Map<String, Object> map) throws Exception {
-		List<Student> list = null;
+	public List<SchoolMember> listFindMember(Map<String, Object> map) {
+		List<SchoolMember> list = null;
 		
 		try {
-			mapper.listStudent(map);
+			mapper.listFindMember(map);
 		} catch (Exception e) {
-			log.info("listStudent : ", e);
+			log.info("listFindMember : ", e);
 			throw e;
 		}
 		return list;

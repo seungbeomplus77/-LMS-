@@ -2,16 +2,149 @@
 
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.sp.app.mapper.CampusLectureMapper">
+    <!-- 상위 카테고리 -->
+   	<insert id="insertMajor" parameterType="com.sp.app.model.CampusLecture">
+   		INSERT INTO majorSubject(majorId, majorName)
+   		VALUES (#{majorId}, #{majorName})
+   	</insert>
+    
+    <update id="updateMajor" parameterType="com.sp.app.model.CampusLecture">
+    	UPDATE majorSubject SET majorName = #{majorName}
+    	WHERE majorId = #{majorId}
+    </update>
+    
+    <delete id="deleteMajor" parameterType="String">
+    	DELETE FROM majorSubject
+    	WHERE majorId = #{majorId}
+    </delete>
+    
+    <select id="listMajor" resultType="com.sp.app.model.CampusLecture" parameterType="String">
+    	SELECT majorId, majorName
+    	FROM majorSubject
+    	ORDER BY majorId
+    </select>
+    
+    <select id="findByMajorId" resultType="com.sp.app.model.CampusLecture" parameterType="String">
+    	SELECT majorId, majorName
+    	FROM majorSubject
+    	WHERE majorId = #{majorId}    
+    </select>
+   
+    <!-- 중위 카테고리 -->
+   	<insert id="insertSub" parameterType="com.sp.app.model.CampusLecture">
+   		INSERT INTO subSubject(subId, subName)
+   		VALUES (#{subId}, #{subName})
+   	</insert>
+    
+    <update id="updateSub" parameterType="com.sp.app.model.CampusLecture">
+    	UPDATE subSubject SET subName = #{subName}
+    	WHERE subId = #{subId}
+    </update>
+    
+    <delete id="deleteSub" parameterType="String">
+    	DELETE FROM subSubject
+    	WHERE subId = #{subId}
+    </delete>
+    
+    <select id="listSub" resultType="com.sp.app.model.CampusLecture" parameterType="String">
+    	SELECT subId, subName
+    	FROM subSubject
+    	ORDER BY subId
+    </select>
+    
+    <select id="findBySubId" resultType="com.sp.app.model.CampusLecture" parameterType="String">
+    	SELECT subId, subName
+    	FROM subSubject
+    	WHERE subId = #{subId}    
+    </select>
+    
+    <!-- 과목 등록 -->
+   	<insert id="insertSubject" parameterType="com.sp.app.model.CampusLecture">
+   		INSERT INTO subject(majorId, subId, subjectId, subjectName)
+   		VALUES (#{majorId}, #{subId}, #{subjectId}, #{subjectName})
+   	</insert>
+    
+    <update id="updateSubject" parameterType="com.sp.app.model.CampusLecture">
+    	UPDATE subject SET subjectName = #{subjectName}
+    	WHERE subjectId = #{subjectId, jdbcType=VARCHAR}
+    </update>
+    
+    <delete id="deleteSubject" parameterType="String">
+    	DELETE FROM subject
+    	WHERE subjectId = #{subjectId, jdbcType=VARCHAR}
+    </delete>
+    
+    <select id="listSubject" resultType="com.sp.app.model.CampusLecture" parameterType="String">
+		SELECT s.majorId, s.subId, s.subjectId, s.subjectName, m.majorName
+		FROM subject s
+		JOIN majorSubject m ON s.majorId = m.majorId
+		WHERE s.subjectId = #{subjectId}
+		ORDER BY s.subjectId
+    </select>
+    
+    <select id="findBySubjectId" resultType="com.sp.app.model.CampusLecture" parameterType="String">
+	    SELECT s.majorId, s.subId, s.subjectId, s.subjectName, ms.majorName
+	    FROM subject s
+	    JOIN majorSubject ms ON s.majorId = ms.majorId
+	    WHERE s.subjectId = #{subjectId, jdbcType=VARCHAR}
+    </select>    
+    
+	<select id="lectureSeq" resultType="Long">
+		SELECT campus_seq.NEXTVAL
+		FROM dual
+	</select>    
     
     <!-- 강의 등록 -->
-    <insert id="insertCampusLecture" parameterType="com.sp.app.model.CampusLecture">
-      INSERT INTO campusLecture 
-        (lectureId, subjectId, teacherId, lectureTitle, lectureContent, youtube, hitCount, reg_date, modify_date, showLecture)
-      VALUES
-        (campusLecture_seq.NEXTVAL, #{subjectId}, #{teacherId}, #{lectureTitle}, #{lectureContent}, #{youtube}, #{hitCount}, 
-         TO_DATE(#{reg_date}, 'YYYY-MM-DD'), TO_DATE(#{modify_date}, 'YYYY-MM-DD'), #{showLecture})
-    </insert>
+	<insert id="insertCampusLecture" parameterType="com.sp.app.model.CampusLecture">
+	    <selectKey keyProperty="lectureId" order="BEFORE" resultType="long">
+	        SELECT campusLecture_seq.NEXTVAL FROM dual
+	    </selectKey>
+	    INSERT INTO campusLecture (
+	        lectureId,
+	        subjectId,
+	        teacherId,
+	        lectureTitle,
+	        lectureContent,
+	        youtube,
+	        hitCount,
+	        reg_date,
+	        modify_date,
+	        showLecture
+	    ) VALUES (
+	        #{lectureId},
+	        #{subjectId},
+	        #{teacherId},
+	        #{lectureTitle},
+	        #{lectureContent},
+	        #{youtube},
+	        0,
+        TO_DATE(#{reg_date,jdbcType=VARCHAR}, 'YYYY-MM-DD'),
+        TO_DATE(#{modify_date,jdbcType=VARCHAR}, 'YYYY-MM-DD'),
+	        #{showLecture}
+	    )
+	</insert>
 
+	
+	<sql id="where-list">
+		<if test="schType=='all' ">
+			( INSTR(lectureTitle, #{kwd}) &gt; 0
+				OR DBMS_LOB.INSTR(lectureContent, #{kwd}) &gt; 0 )
+		</if>
+		<if test="schType=='title' ">
+			INSTR(lectureTitle, #{kwd}) &gt; 0
+		</if>
+		<if test="schType=='content' ">
+			DBMS_LOB.INSTR(lectureContent, #{kwd}) &gt; 0 
+		</if>
+		<if test="schType=='userName' ">
+			INSTR(userName, #{kwd}) &gt; 0
+		</if>
+		<if test="schType=='reg_date' ">
+			( TO_CHAR(reg_date, 'YYYY-MM-DD') = #{kwd}
+				OR TO_CHAR(reg_date, 'YYYYMMDD') = #{kwd} )
+		</if>
+	</sql>
+    
     <!-- 강의 수정 -->
     <update id="updateCampusLecture" parameterType="com.sp.app.model.CampusLecture">
       UPDATE campusLecture
@@ -21,7 +154,6 @@
           lectureContent = #{lectureContent},
           youtube = #{youtube},
           hitCount = #{hitCount},
-          reg_date = TO_DATE(#{reg_date}, 'YYYY-MM-DD'),
           modify_date = TO_DATE(#{modify_date}, 'YYYY-MM-DD'),
           showLecture = #{showLecture}
       WHERE lectureId = #{lectureId}
@@ -34,53 +166,86 @@
     </delete>
 
     <!-- 강의 목록 조회 -->
-    <select id="listCampusLecture" parameterType="map" resultType="com.sp.app.model.CampusLecture">
-      SELECT lectureId, subjectId, teacherId, lectureTitle, lectureContent, youtube, hitCount,
-             TO_CHAR(reg_date, 'YYYY-MM-DD') AS reg_date,
-             TO_CHAR(modify_date, 'YYYY-MM-DD') AS modify_date,
-             showLecture
-      FROM campusLecture
-      <where>
-         <if test="subjectId != null">
-           AND subjectId = #{subjectId}
-         </if>
-         <if test="teacherId != null">
-           AND teacherId = #{teacherId}
-         </if>
-         <!-- 추가 조건 필요 시 -->
-      </where>
-      ORDER BY lectureId DESC
-    </select>
+	<select id="listCampusLecture" parameterType="map" resultType="com.sp.app.model.CampusLecture">
+	  SELECT cl.lectureId, cl.teacherId, userName, cl.lectureTitle, cl.hitCount,
+	         TO_CHAR(reg_date, 'YYYY-MM-DD') AS reg_date
+	  FROM campusLecture cl
+	  JOIN schoolMember sm ON cl.teacherId = sm.userId
+	  <where>
+	      cl.subjectId = #{subjectId, jdbcType=VARCHAR}
+	      <if test="kwd != null and kwd != ''">
+	          AND <include refid="where-list"/>
+	      </if>
+	  </where>
+	  ORDER BY lectureId DESC
+	  OFFSET #{offset} ROWS FETCH FIRST #{size} ROWS ONLY
+	</select>
 
     <!-- 단건 조회 -->
-    <select id="findById" parameterType="long" resultType="com.sp.app.model.CampusLecture">
-      SELECT lectureId, subjectId, teacherId, lectureTitle, lectureContent, youtube, hitCount,
-             TO_CHAR(reg_date, 'YYYY-MM-DD') AS reg_date,
-             TO_CHAR(modify_date, 'YYYY-MM-DD') AS modify_date,
-             showLecture
-      FROM campusLecture
-      WHERE lectureId = #{lectureId}
-    </select>
+	<select id="findById" parameterType="long" resultType="com.sp.app.model.CampusLecture">
+	    SELECT 
+	        lectureId,
+	        cl.teacherId,
+	        sm.userName,
+	        cl.lectureTitle,
+	        cl.lectureContent,
+	        cl.youtube,
+	        cl.reg_date,
+	        cl.hitCount,
+	        s.majorId,
+	        s.subId,
+	        cl.subjectId,
+	        s.subjectName
+	    FROM campuslecture cl
+	    JOIN subject s ON cl.subjectId = s.subjectId
+	    JOIN schoolMember sm ON cl.teacherId = sm.userId
+	    WHERE lectureId = #{lectureId}
+	</select>
 
     <!-- 조회수 증가 -->
-    <update id="updateHitCount" parameterType="long">
+    <update id="updateCampusLectureHitCount" parameterType="long">
       UPDATE campusLecture
       SET hitCount = hitCount + 1
       WHERE lectureId = #{lectureId}
     </update>
 
     <!-- 데이터 건수 조회 -->
-    <select id="dataCount" parameterType="map" resultType="int">
-      SELECT COUNT(*)
-      FROM campusLecture
-      <where>
-         <if test="subjectId != null">
-           AND subjectId = #{subjectId}
-         </if>
-         <if test="teacherId != null">
-           AND teacherId = #{teacherId}
-         </if>
-      </where>
+	<select id="campusLectureDataCount" parameterType="map" resultType="int">
+	  SELECT NVL(COUNT(*), 0)
+	  FROM campusLecture c
+	  JOIN schoolMember s ON c.teacherId = s.userId
+	  WHERE c.subjectId = #{subjectId, jdbcType=VARCHAR}
+	</select>
+
+	<!-- 이전글 -->
+	<select id="findByPrev" parameterType="map" resultType="com.sp.app.model.CampusLecture">
+		SELECT lectureId, lectureTitle
+		FROM campusLecture cl
+		JOIN schoolMember m ON cl.teacherId = m.userId
+		<where>
+			cl.subjectId = #{subjectId}
+			<if test="kwd != null and kwd != '' ">
+				AND <include refid="where-list"/>
+			</if>
+			AND (lectureId &gt; #{lectureId})
+		</where>
+		ORDER BY lectureId ASC
+		FETCH FIRST 1 ROWS ONLY
     </select>
 
+    <!-- 다음글 -->
+    <select id="findByNext" parameterType="map" resultType="com.sp.app.model.CampusLecture">
+		SELECT lectureId, lectureTitle
+		FROM campusLecture cl
+		JOIN schoolMember m ON cl.teacherId = m.userId
+		<where>
+			cl.subjectId = #{subjectId}
+			<if test="kwd != null and kwd != '' ">
+				AND <include refid="where-list"/>
+			</if>
+			AND (lectureId &lt; #{lectureId})
+		</where>
+		ORDER BY lectureId ASC
+		FETCH FIRST 1 ROWS ONLY
+    </select>
 </mapper>

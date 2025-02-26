@@ -76,30 +76,31 @@
   </thead>
   
   <tbody>
+  	<c:forEach var="dto" items="${list}" varStatus="status">
     <tr>
     	<td>
     		1
     	</td>
     	<td>
-    		ech0782
+    		${dto.userId}
     	</td>
     	<td>
-    		호날두
+    		${dto.userName}
     	</td>
     	<td>
-    		여자
+    		${dto.gender}
     	</td>
     	<td>
-    		2000-11-11
+    		${dto.birth}
     	</td>
     	<td>
-    		용산구 용산2동 용산빌라 2층
+    		${dto.addr1} | ${dto.addr2}
     	</td>
     	<td>
-    		010-1111-1111
+    		${dto.tel}
     	</td>
     	<td>
-    		llssbb@naver.com
+    		${dto.email}
     	</td>
 		<td class="align-middle text-center">
 		    <button type="button" class="btn btn-primary btn-sm d-flex justify-content-center align-items-center" style="height: 28px; width: 100px;" data-bs-toggle="modal" data-bs-target="#exampleModal">
@@ -107,6 +108,7 @@
 		    </button>
 		</td>
     </tr>
+    	</c:forEach>
   </tbody>
 </table>
 

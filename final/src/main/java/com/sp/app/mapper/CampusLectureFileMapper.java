@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
 
+import com.sp.app.model.CampusLecture;
 import com.sp.app.model.CampusLectureFile;
 
 @Mapper
